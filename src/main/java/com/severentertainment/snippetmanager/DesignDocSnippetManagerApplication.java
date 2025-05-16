@@ -1,0 +1,13 @@
+package com.severentertainment.snippetmanager;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class DesignDocSnippetManagerApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(DesignDocSnippetManagerApplication.class, args);
+	}
+
+}
