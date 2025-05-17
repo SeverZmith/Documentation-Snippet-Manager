@@ -51,19 +51,21 @@ public class SnippetController {
     // HTTP PUT to /api/v1/snippets/{id}
     @PutMapping("/{id}")
     public ResponseEntity<Snippet> updateSnippet(@PathVariable Long id, @RequestBody Snippet snippetDetails) {
-        Snippet updatedSnippet = snippetService.updateSnippet(id, snippetDetails);
-        if (updatedSnippet != null) {
-            return new ResponseEntity<>(updatedSnippet, HttpStatus.OK); // 200 OK
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
-        }
+        Optional<Snippet> updatedSnippetOptional = snippetService.updateSnippet(id, snippetDetails);
+        return updatedSnippetOptional
+                .map(snippet -> new ResponseEntity<>(snippet, HttpStatus.OK)) // 200 OK
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND)); // 404 Not Found
     }
 
     // Endpoint to delete a snippet
     // HTTP DELETE to /api/v1/snippets/{id}
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSnippet(@PathVariable Long id) {
-        snippetService.deleteSnippet(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 204 No Content
+        boolean deleted = snippetService.deleteSnippet(id);
+        if (deleted) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 204 No Content
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
+        }
     }
 }

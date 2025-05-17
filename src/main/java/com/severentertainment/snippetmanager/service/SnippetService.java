@@ -34,20 +34,22 @@ public class SnippetService {
     }
 
     // Update an existing snippet
-    public Snippet updateSnippet(Long id, Snippet snippetDetails) {
-        Optional<Snippet> optionalSnippet = snippetRepository.findById(id);
-        if (optionalSnippet.isPresent()) {
-            Snippet existingSnippet = optionalSnippet.get();
-            existingSnippet.setTitle(snippetDetails.getTitle());
-            existingSnippet.setContent(snippetDetails.getContent());
-            return snippetRepository.save(existingSnippet);
-        } else {
-            return null;
-        }
+    public Optional<Snippet> updateSnippet(Long id, Snippet snippetDetails) {
+        return snippetRepository.findById(id) // Find an existing snippet...
+                .map(existingSnippet -> { // If it exists...
+                    existingSnippet.setTitle(snippetDetails.getTitle());
+                    existingSnippet.setContent(snippetDetails.getContent());
+                    return snippetRepository.save(existingSnippet); // Save and return the updated snippet
+                });
     }
 
     // Delete a snippet
-    public void deleteSnippet(Long id) {
-        snippetRepository.deleteById(id);
+    public boolean deleteSnippet(Long id) {
+        if (snippetRepository.existsById(id)) {
+            snippetRepository.deleteById(id);
+            return true; // Deletion successful
+        }
+
+        return false; // Snippet not found
     }
 }
