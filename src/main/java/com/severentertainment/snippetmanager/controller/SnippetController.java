@@ -21,24 +21,40 @@ public class SnippetController {
         this.snippetService = snippetService;
     }
 
-    // Endpoint to create a new snippet
-    // HTTP POST to /api/v1/snippets
+    /**
+     * Handles HTTP POST requests for creating a new snippet.
+     * The snippet data is expected in the request body as JSON.
+     *
+     * @param snippet The {@link Snippet} object derived from the JSON request body.
+     *                The ID, creationDate, and lastModifiedData fields should be null or will be ignored.
+     * @return A {@link ResponseEntity} containing the created {@link Snippet} and an HTTP status code of 201 (Created).
+     */
     @PostMapping
     public ResponseEntity<Snippet> createSnippet(@RequestBody Snippet snippet) {
         Snippet createdSnippet = snippetService.createSnippet(snippet);
         return new ResponseEntity<>(createdSnippet, HttpStatus.CREATED); // 201 Created
     }
 
-    // Endpoint to get all snippets
-    // HTTP GET to /api/v1/snippets
+    /**
+     * Handles HTTP GET requests for retrieving all snippets.
+     *
+     * @return A {@link ResponseEntity} containing a list of all {@link Snippet} objects
+     * and an HTTP status code of 200 (OK). The list may be empty if no snippets exist.
+     */
     @GetMapping
     public ResponseEntity<List<Snippet>> getAllSnippets() {
         List<Snippet> snippets = snippetService.getAllSnippets();
         return new ResponseEntity<>(snippets, HttpStatus.OK); // 200 OK
     }
 
-    // Endpoint to get a single snippet by its ID
-    // HTTP GET to /api/v1/snippets/{id}
+    /**
+     * Handles HTTP GET requests for retrieving a snippet by its ID.
+     * The ID of the snippet is extracted from the URL path.
+     *
+     * @param id The unique ID of the snippet to retrieve.
+     * @return A {@link ResponseEntity} containing the {@link Snippet} object if found,
+     * and an HTTP status code of 200 (OK) or 404 (Not Found).
+     */
     @GetMapping("/{id}")
     public ResponseEntity<Snippet> getSnippetById(@PathVariable Long id) {
         Optional<Snippet> snippetOptional = snippetService.getSnippetById(id);
@@ -47,8 +63,17 @@ public class SnippetController {
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND)); // 404 Not Found
     }
 
-    // Endpoint to update an existing snippet
-    // HTTP PUT to /api/v1/snippets/{id}
+    /**
+     * Handles HTTP PUT requests for updating an existing snippet.
+     * The ID of the snippet to update is extracted from the URL path.
+     * The snippet data is expected in the request body as JSON.
+     *
+     * @param id The unique ID of the snippet to update.
+     * @param snippetDetails A {@link Snippet} object derived from the JSON request body,
+     *                       containing the new details for the snippet.
+     * @return A {@link ResponseEntity} containing the updated {@link Snippet} object if successful,
+     * and an HTTP status code of 200 (OK) or 404 (Not Found).
+     */
     @PutMapping("/{id}")
     public ResponseEntity<Snippet> updateSnippet(@PathVariable Long id, @RequestBody Snippet snippetDetails) {
         Optional<Snippet> updatedSnippetOptional = snippetService.updateSnippet(id, snippetDetails);
@@ -57,8 +82,14 @@ public class SnippetController {
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND)); // 404 Not Found
     }
 
-    // Endpoint to delete a snippet
-    // HTTP DELETE to /api/v1/snippets/{id}
+    /**
+     * Handles HTTP DELETE requests for deleting a snippet by its ID.
+     * The ID of the snippet is extracted from the URL path.
+     *
+     * @param id The unique ID of the snippet to delete.
+     * @return A {@link ResponseEntity} with an HTTP status code of 204 (No Content) if the snippet
+     * was found and successfully deleted, or 404 (Not Found).
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSnippet(@PathVariable Long id) {
         boolean deleted = snippetService.deleteSnippet(id);
@@ -68,4 +99,5 @@ public class SnippetController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
         }
     }
+
 }

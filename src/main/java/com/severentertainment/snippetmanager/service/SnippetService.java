@@ -18,22 +18,44 @@ public class SnippetService {
         this.snippetRepository = snippetRepository;
     }
 
-    // Create a new snippet
+    /**
+     * Creates and saves new snippet.
+     *
+     * @param snippet The {@link Snippet} object to be created and saved.
+     * @return The saved {@link Snippet} object, including its generated ID and timestamps.
+     */
     public Snippet createSnippet(Snippet snippet) {
         return snippetRepository.save(snippet);
     }
 
-    // Get all snippets
+    /**
+     * Retrieves all snippets from the database.
+     *
+     * @return A list of all {@link Snippet} objects.
+     */
     public List<Snippet> getAllSnippets() {
         return snippetRepository.findAll();
     }
 
-    // Get a single snippet by its ID
+    /**
+     * Retrieves a snippet by its ID.
+     *
+     * @param id The ID of the snippet to retrieve.
+     * @return An {@link Optional} containing the {@link Snippet} if found, or an empty {@link Optional} if not.
+     */
     public Optional<Snippet> getSnippetById(Long id) {
         return snippetRepository.findById(id);
     }
 
-    // Update an existing snippet
+    /**
+     * Updates an existing snippet.
+     * If a snippet with the given ID is found, its title and content are updated.
+     * The lastModifiedData timestamp is automatically updated by Hibernate's @UpdateTimestamp.
+     *
+     * @param id The ID of the snippet to update.
+     * @param snippetDetails A {@link Snippet} object containing the new title and content for the snippet.
+     * @return An {@link Optional} containing the updated {@link Snippet} if successful, or an empty {@link Optional} if not.
+     */
     public Optional<Snippet> updateSnippet(Long id, Snippet snippetDetails) {
         return snippetRepository.findById(id) // Find an existing snippet...
                 .map(existingSnippet -> { // If it exists...
@@ -43,7 +65,12 @@ public class SnippetService {
                 });
     }
 
-    // Delete a snippet
+    /**
+     * Deletes a snippet by its ID.
+     *
+     * @param id The ID of the snippet to delete.
+     * @return {@code true} if the deletion was successful, {@code false} if not.
+     */
     public boolean deleteSnippet(Long id) {
         if (snippetRepository.existsById(id)) {
             snippetRepository.deleteById(id);
@@ -52,4 +79,5 @@ public class SnippetService {
 
         return false; // Snippet not found
     }
+
 }

@@ -33,4 +33,5 @@ public class Snippet {
 
     @UpdateTimestamp
     private Instant lastModifiedData;
+
 }
