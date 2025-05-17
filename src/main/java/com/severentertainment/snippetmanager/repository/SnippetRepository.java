@@ -1,4 +1,4 @@
-﻿package com.severentertainment.snippetmanager.repository;
+package com.severentertainment.snippetmanager.repository;
 
 import com.severentertainment.snippetmanager.domain.Snippet;
 import org.springframework.data.jpa.repository.JpaRepository;

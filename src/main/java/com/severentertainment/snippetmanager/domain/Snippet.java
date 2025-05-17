@@ -1,4 +1,4 @@
-﻿package com.severentertainment.snippetmanager.domain;
+package com.severentertainment.snippetmanager.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,7 +23,7 @@ public class Snippet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    private String title;
 
     @Lob
     private String content;
