@@ -34,9 +34,9 @@ public class SnippetController {
      * @return A {@link ResponseEntity} containing the created {@link Snippet} and an HTTP status code of 201 (Created).
      */
     @PostMapping
-    public ResponseEntity<Snippet> createSnippet(@RequestBody Snippet snippet) {
-        Snippet createdSnippet = snippetService.createSnippet(snippet);
-        return new ResponseEntity<>(createdSnippet, HttpStatus.CREATED); // 201 Created
+    public ResponseEntity<SnippetResponseDto> createSnippet(@RequestBody Snippet snippet) {
+        SnippetResponseDto createdSnippetDto = snippetService.createSnippet(snippet);
+        return new ResponseEntity<>(createdSnippetDto, HttpStatus.CREATED); // 201 Created
     }
 
     /**
@@ -46,8 +46,8 @@ public class SnippetController {
      * and an HTTP status code of 200 (OK). The list may be empty if no snippets exist.
      */
     @GetMapping
-    public ResponseEntity<List<Snippet>> getAllSnippets() {
-        List<Snippet> snippets = snippetService.getAllSnippets();
+    public ResponseEntity<List<SnippetResponseDto>> getAllSnippets() {
+        List<SnippetResponseDto> snippets = snippetService.getAllSnippets();
         return new ResponseEntity<>(snippets, HttpStatus.OK); // 200 OK
     }
 
@@ -60,8 +60,8 @@ public class SnippetController {
      * and an HTTP status code of 200 (OK) or 404 (Not Found).
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Snippet> getSnippetById(@PathVariable Long id) {
-        Optional<Snippet> snippetOptional = snippetService.getSnippetById(id);
+    public ResponseEntity<SnippetResponseDto> getSnippetById(@PathVariable Long id) {
+        Optional<SnippetResponseDto> snippetOptional = snippetService.getSnippetById(id);
         return snippetOptional
                 .map(snippet -> new ResponseEntity<>(snippet, HttpStatus.OK)) // 200 OK
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND)); // 404 Not Found
@@ -79,9 +79,9 @@ public class SnippetController {
      * and an HTTP status code of 200 (OK) or 404 (Not Found).
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Snippet> updateSnippet(@PathVariable Long id, @RequestBody Snippet snippetDetails) {
-        Optional<Snippet> updatedSnippetOptional = snippetService.updateSnippet(id, snippetDetails);
-        return updatedSnippetOptional
+    public ResponseEntity<SnippetResponseDto> updateSnippet(@PathVariable Long id, @RequestBody Snippet snippetDetails) {
+        Optional<SnippetResponseDto> updatedSnippetDtoOptional = snippetService.updateSnippet(id, snippetDetails);
+        return updatedSnippetDtoOptional
                 .map(snippet -> new ResponseEntity<>(snippet, HttpStatus.OK)) // 200 OK
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND)); // 404 Not Found
     }

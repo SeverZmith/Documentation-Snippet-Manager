@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class SnippetService {
@@ -34,8 +35,9 @@ public class SnippetService {
      * @return The saved {@link Snippet} object, including its generated ID and timestamps.
      */
     @Transactional
-    public Snippet createSnippet(Snippet snippet) {
-        return snippetRepository.save(snippet);
+    public SnippetResponseDto createSnippet(Snippet snippet) {
+        Snippet savedSnippet = snippetRepository.save(snippet);
+        return EntityToDtoMapper.snippetToSnippetResponseDto(savedSnippet);
     }
 
     /**
@@ -44,8 +46,11 @@ public class SnippetService {
      * @return A list of all {@link Snippet} objects.
      */
     @Transactional(readOnly = true)
-    public List<Snippet> getAllSnippets() {
-        return snippetRepository.findAll();
+    public List<SnippetResponseDto> getAllSnippets() {
+        List<Snippet> snippets = snippetRepository.findAll();
+        return snippets.stream()
+                .map(EntityToDtoMapper::snippetToSnippetResponseDto)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -55,8 +60,9 @@ public class SnippetService {
      * @return An {@link Optional} containing the {@link Snippet} if found, or an empty {@link Optional} if not.
      */
     @Transactional(readOnly = true)
-    public Optional<Snippet> getSnippetById(Long id) {
-        return snippetRepository.findById(id);
+    public Optional<SnippetResponseDto> getSnippetById(Long id) {
+        return snippetRepository.findById(id)
+                .map(EntityToDtoMapper::snippetToSnippetResponseDto);
     }
 
     /**
@@ -69,12 +75,14 @@ public class SnippetService {
      * @return An {@link Optional} containing the updated {@link Snippet} if successful, or an empty {@link Optional} if not.
      */
     @Transactional
-    public Optional<Snippet> updateSnippet(Long id, Snippet snippetDetails) {
+    public Optional<SnippetResponseDto> updateSnippet(Long id, Snippet snippetDetails) {
         return snippetRepository.findById(id) // Find an existing snippet...
                 .map(existingSnippet -> { // If it exists...
                     existingSnippet.setTitle(snippetDetails.getTitle());
                     existingSnippet.setContent(snippetDetails.getContent());
-                    return snippetRepository.save(existingSnippet); // Save and return the updated snippet
+
+                    Snippet savedSnippet = snippetRepository.save(existingSnippet);
+                    return EntityToDtoMapper.snippetToSnippetResponseDto(savedSnippet); // Save and return the updated snippet
                 });
     }
 

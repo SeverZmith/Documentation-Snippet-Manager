@@ -32,29 +32,15 @@ public class SnippetServiceTest {
     private SnippetService snippetService;
 
     @Test
-    public void getAllSnippets_shouldReturnEmptyList_whenNoSnippetsExist () {
-        // Configure the mock repository to return an empty list when findAll is called
-        when(snippetRepositoryMock.findAll()).thenReturn(Collections.emptyList());
-
-        // Call the method under test
-        List<Snippet> actualSnippets = snippetService.getAllSnippets();
-
-        // 1. Check that the returned list is empty
-        assertNotNull(actualSnippets, "The returned list of snippets should not be null");
-        assertTrue(actualSnippets.isEmpty(), "The returned list of snippets should be empty");
-
-        // 2. Verify that findAll was called once
-        verify(snippetRepositoryMock, times(1)).findAll();
-    }
-
-    @Test
     public void getAllSnippets_shouldReturnListOfSnippets_whenSnippetsExist () {
+        // Simulate snippet entities
         Snippet snippet1 = new Snippet();
         snippet1.setId(1L);
         snippet1.setTitle("First Snippet");
         snippet1.setContent("Content of first snippet");
         snippet1.setCreationData(Instant.now());
         snippet1.setLastModifiedData(Instant.now());
+        snippet1.setTags(new HashSet<>());
 
         Snippet snippet2 = new Snippet();
         snippet2.setId(2L);
@@ -62,24 +48,68 @@ public class SnippetServiceTest {
         snippet2.setContent("Content of second snippet");
         snippet2.setCreationData(Instant.now());
         snippet2.setLastModifiedData(Instant.now());
+        snippet2.setTags(new HashSet<>());
 
         List<Snippet> expectedSnippets = Arrays.asList(snippet1, snippet2);
+
+        // Simulate snippet DTOs
+        SnippetResponseDto dto1 = new SnippetResponseDto(
+                snippet1.getId(),
+                snippet1.getTitle(),
+                snippet1.getContent(),
+                snippet1.getCreationData(),
+                snippet1.getLastModifiedData(),
+                new HashSet<>()
+        );
+
+        SnippetResponseDto dto2 = new SnippetResponseDto(
+                snippet2.getId(),
+                snippet2.getTitle(),
+                snippet2.getContent(),
+                snippet2.getCreationData(),
+                snippet2.getLastModifiedData(),
+                new HashSet<>()
+        );
+
+        List<SnippetResponseDto> expectedSnippetDtos = Arrays.asList(dto1, dto2);
 
         // Configure the mock repository to return a list of snippets when findAll is called
         when(snippetRepositoryMock.findAll()).thenReturn(expectedSnippets);
 
         // Call the method under test
-        List<Snippet> actualSnippets = snippetService.getAllSnippets();
+        List<SnippetResponseDto> actualSnippetDtos = snippetService.getAllSnippets();
 
         // 1. Check that the returned list is not empty
-        assertNotNull(actualSnippets, "The returned list of snippets should not be null");
-        assertFalse(actualSnippets.isEmpty(), "The returned list of snippets should not be empty");
+        assertNotNull(actualSnippetDtos, "The returned list of snippets should not be null");
+        assertFalse(actualSnippetDtos.isEmpty(), "The returned list of snippets should not be empty");
 
         // 2. Check that the returned list matches the expected list
-        assertEquals(2, actualSnippets.size(), "The returned list of snippets should have 2 elements");
-        assertEquals(expectedSnippets, actualSnippets, "The returned list of snippets should match the expected list");
+        assertEquals(2, actualSnippetDtos.size(), "The returned list of snippets should have 2 elements");
 
-        // 3. Verify that findAll was called once
+        // 3. Check that the expected snippet is equivalent to the actual snippet
+        assertEquals(expectedSnippetDtos.size(), actualSnippetDtos.size(), "The returned list of snippets should have the same number of elements as the expected list");
+        for (int i = 0; i < expectedSnippetDtos.size(); i++) {
+            assertEquals(expectedSnippetDtos.get(i).getId(), actualSnippetDtos.get(i).getId(), "The ID of the returned snippet should match the ID of the corresponding snippet in the expected list");
+            assertEquals(expectedSnippetDtos.get(i).getTitle(), actualSnippetDtos.get(i).getTitle(), "The title of the returned snippet should match the title of the corresponding snippet in the expected list");
+        }
+
+        // 4. Verify that findAll was called once
+        verify(snippetRepositoryMock, times(1)).findAll();
+    }
+
+    @Test
+    public void getAllSnippets_shouldReturnEmptyList_whenNoSnippetsExist () {
+        // Configure the mock repository to return an empty list when findAll is called
+        when(snippetRepositoryMock.findAll()).thenReturn(Collections.emptyList());
+
+        // Call the method under test
+        List<SnippetResponseDto> actualSnippets = snippetService.getAllSnippets();
+
+        // 1. Check that the returned list is empty
+        assertNotNull(actualSnippets, "The returned list of snippets should not be null");
+        assertTrue(actualSnippets.isEmpty(), "The returned list of snippets should be empty");
+
+        // 2. Verify that findAll was called once
         verify(snippetRepositoryMock, times(1)).findAll();
     }
 
@@ -91,19 +121,36 @@ public class SnippetServiceTest {
         expectedSnippet.setContent("Content of first snippet");
         expectedSnippet.setCreationData(Instant.now());
         expectedSnippet.setLastModifiedData(Instant.now());
+        expectedSnippet.setTags(new HashSet<>());
 
         // Configure the mock repository to return the expected snippet when findById is called
         when(snippetRepositoryMock.findById(1L)).thenReturn(Optional.of(expectedSnippet));
 
+        SnippetResponseDto expectedSnippetDto = new SnippetResponseDto(
+                expectedSnippet.getId(),
+                expectedSnippet.getTitle(),
+                expectedSnippet.getContent(),
+                expectedSnippet.getCreationData(),
+                expectedSnippet.getLastModifiedData(),
+                new HashSet<>()
+        );
+
         // Call the method under test
-        Optional<Snippet> actualSnippetOptional = snippetService.getSnippetById(1L);
+        Optional<SnippetResponseDto> actualSnippetOptional = snippetService.getSnippetById(1L);
 
         // 1. Check that the returned optional is present
         assertTrue(actualSnippetOptional.isPresent(), "The returned optional should contain a snippet for existing ID");
-        assertEquals(expectedSnippet, actualSnippetOptional.get(), "The found snippet should match the expected snippet");
-        assertEquals("First Snippet", actualSnippetOptional.get().getTitle(), "The title of the found snippet should match the expected title");
+        SnippetResponseDto actualSnippetDto = actualSnippetOptional.get();
 
-        // 2. Verify that findById was called once
+        // 2. Check that the fields were retrieved correctly
+        assertEquals(expectedSnippetDto.getId(), actualSnippetDto.getId(), "The ID of the returned snippet should match the ID of the expected snippet");
+        assertEquals(expectedSnippetDto.getTitle(), actualSnippetDto.getTitle(), "The title of the returned snippet should match the title of the expected snippet");
+        assertEquals(expectedSnippetDto.getContent(), actualSnippetDto.getContent(), "The content of the returned snippet should match the content of the expected snippet");
+        assertEquals(expectedSnippetDto.getCreationData(), actualSnippetDto.getCreationData(), "The creation date of the returned snippet should match the creation date of the expected snippet");
+        assertEquals(expectedSnippetDto.getLastModifiedData(), actualSnippetDto.getLastModifiedData(), "The last modified date of the returned snippet should match the last modified date of the expected snippet");
+        assertTrue(actualSnippetDto.getTags().isEmpty(), "The tags of the returned snippet should be empty");
+
+        // 3. Verify that findById was called once
         verify(snippetRepositoryMock, times(1)).findById(1L);
     }
 
@@ -113,11 +160,11 @@ public class SnippetServiceTest {
         when(snippetRepositoryMock.findById(99L)).thenReturn(Optional.empty());
 
         // Call the method under test
-        Optional<Snippet> actualSnippetOptional = snippetService.getSnippetById(99L);
+        Optional<SnippetResponseDto> actualSnippetDtoOptional = snippetService.getSnippetById(99L);
 
         // 1. Check that the returned optional is empty
-        assertNotNull(actualSnippetOptional, "The returned optional should not be null");
-        assertTrue(actualSnippetOptional.isEmpty(), "The returned optional should be empty");
+        assertNotNull(actualSnippetDtoOptional, "The returned optional should not be null");
+        assertTrue(actualSnippetDtoOptional.isEmpty(), "The returned optional should be empty");
 
         // 2. Verify that findById was called once
         verify(snippetRepositoryMock, times(1)).findById(99L);
@@ -135,22 +182,33 @@ public class SnippetServiceTest {
         savedSnippetFromRepo.setContent(snippetToCreate.getContent());
         savedSnippetFromRepo.setCreationData(Instant.now());
         savedSnippetFromRepo.setLastModifiedData(Instant.now());
+        savedSnippetFromRepo.setTags(new HashSet<>());
+
+        SnippetResponseDto expectedSnippetDto = new SnippetResponseDto(
+                savedSnippetFromRepo.getId(),
+                savedSnippetFromRepo.getTitle(),
+                savedSnippetFromRepo.getContent(),
+                savedSnippetFromRepo.getCreationData(),
+                savedSnippetFromRepo.getLastModifiedData(),
+                new HashSet<>()
+        );
 
         // Configure the mock repository to return the saved snippet when save is called
         when(snippetRepositoryMock.save(any(Snippet.class))).thenReturn(savedSnippetFromRepo);
 
         // Call the method under test
-        Snippet actualCreatedSnippet = snippetService.createSnippet(snippetToCreate);
+        SnippetResponseDto actualCreatedSnippetDto = snippetService.createSnippet(snippetToCreate);
 
         // 1. Check that the returned snippet is not null
-        assertNotNull(actualCreatedSnippet, "The returned snippet should not be null");
+        assertNotNull(actualCreatedSnippetDto, "The returned snippet should not be null");
 
-        // 2. Check that the returned snippet matches the saved snippet
-        assertEquals(savedSnippetFromRepo.getId(), actualCreatedSnippet.getId(), "The ID of the returned snippet should match the ID of the saved snippet");
-        assertEquals(snippetToCreate.getTitle(), actualCreatedSnippet.getTitle(), "The title of the returned snippet should match the title of the saved snippet");
-        assertEquals(snippetToCreate.getContent(), actualCreatedSnippet.getContent(), "The content of the returned snippet should match the content of the saved snippet");
-        assertEquals(savedSnippetFromRepo.getCreationData(), actualCreatedSnippet.getCreationData(), "The creation date of the returned snippet should match the creation date of the saved snippet");
-        assertEquals(savedSnippetFromRepo.getLastModifiedData(), actualCreatedSnippet.getLastModifiedData(), "The last modified date of the returned snippet should match the last modified date of the saved snippet");
+        // 2. Check that the fields were created correctly
+        assertEquals(expectedSnippetDto.getId(), actualCreatedSnippetDto.getId(), "The ID of the returned snippet should match the ID of the saved snippet");
+        assertEquals(expectedSnippetDto.getTitle(), actualCreatedSnippetDto.getTitle(), "The title of the returned snippet should match the title of the saved snippet");
+        assertEquals(expectedSnippetDto.getContent(), actualCreatedSnippetDto.getContent(), "The content of the returned snippet should match the content of the saved snippet");
+        assertEquals(expectedSnippetDto.getCreationData(), actualCreatedSnippetDto.getCreationData(), "The creation date of the returned snippet should match the creation date of the saved snippet");
+        assertEquals(expectedSnippetDto.getLastModifiedData(), actualCreatedSnippetDto.getLastModifiedData(), "The last modified date of the returned snippet should match the last modified date of the saved snippet");
+        assertTrue(actualCreatedSnippetDto.getTags().isEmpty(), "The tags of the returned snippet should be empty");
 
         // 3. Verify that save was called once with the correct snippet
         ArgumentCaptor<Snippet> snippetArgumentCaptor = ArgumentCaptor.forClass(Snippet.class);
@@ -177,6 +235,7 @@ public class SnippetServiceTest {
         existingSnippet.setContent("Content of existing snippet");
         existingSnippet.setCreationData(initialCreationDate);
         existingSnippet.setLastModifiedData(initialUpdateDate);
+        existingSnippet.setTags(new HashSet<>());
 
         // Represents the new data coming in
         Snippet snippetUpdateDetails = new Snippet();
@@ -190,6 +249,17 @@ public class SnippetServiceTest {
         savedSnippetAfterUpdate.setContent(snippetUpdateDetails.getContent());
         savedSnippetAfterUpdate.setCreationData(initialCreationDate);
         savedSnippetAfterUpdate.setLastModifiedData(Instant.now());
+        savedSnippetAfterUpdate.setTags(new HashSet<>());
+
+        // Simulate expected DTO
+        SnippetResponseDto expectedSnippetDto = new SnippetResponseDto(
+                snippetId,
+                snippetUpdateDetails.getTitle(),
+                snippetUpdateDetails.getContent(),
+                savedSnippetAfterUpdate.getCreationData(),
+                savedSnippetAfterUpdate.getLastModifiedData(),
+                new HashSet<>()
+        );
 
         // When findById is called, return the existing snippet
         when(snippetRepositoryMock.findById(snippetId)).thenReturn(Optional.of(existingSnippet));
@@ -197,20 +267,20 @@ public class SnippetServiceTest {
         // When save is called, return the saved updated snippet
         when(snippetRepositoryMock.save(any(Snippet.class))).thenReturn(savedSnippetAfterUpdate);
 
-        Optional<Snippet> actualUpdatedSnippetOptional = snippetService.updateSnippet(snippetId, snippetUpdateDetails);
+        // Call the method under test
+        Optional<SnippetResponseDto> actualUpdatedSnippetOptional = snippetService.updateSnippet(snippetId, snippetUpdateDetails);
 
         // 1. Check that the optional is present
         assertTrue(actualUpdatedSnippetOptional.isPresent(), "The returned optional should contain an updated snippet for an existing ID");
-        Snippet actualUpdatedSnippet = actualUpdatedSnippetOptional.get();
+        SnippetResponseDto actualUpdatedSnippetDto = actualUpdatedSnippetOptional.get();
 
         // 2. Check that the fields were updated correctly
-        assertEquals(snippetId, actualUpdatedSnippet.getId(), "The ID should remain the same");
-        assertEquals(snippetUpdateDetails.getTitle(), actualUpdatedSnippet.getTitle(), "The title should be updated");
-        assertEquals(snippetUpdateDetails.getContent(), actualUpdatedSnippet.getContent(), "The content should be updated");
-        assertEquals(initialCreationDate, actualUpdatedSnippet.getCreationData(), "The creation date should remain the same");
-
-        assertNotNull(actualUpdatedSnippet.getLastModifiedData(), "The last modified date should be set");
-        assertEquals(savedSnippetAfterUpdate.getLastModifiedData(), actualUpdatedSnippet.getLastModifiedData(), "The last modified date should match the date of the saved updated snippet");
+        assertEquals(expectedSnippetDto.getId(), actualUpdatedSnippetDto.getId(), "The ID of the returned snippet should match the ID of the saved snippet");
+        assertEquals(expectedSnippetDto.getTitle(), actualUpdatedSnippetDto.getTitle(), "The title of the returned snippet should match the title of the saved snippet");
+        assertEquals(expectedSnippetDto.getContent(), actualUpdatedSnippetDto.getContent(), "The content of the returned snippet should match the content of the saved snippet");
+        assertEquals(expectedSnippetDto.getCreationData(), actualUpdatedSnippetDto.getCreationData(), "The creation date of the returned snippet should match the creation date of the saved snippet");
+        assertEquals(expectedSnippetDto.getLastModifiedData(), actualUpdatedSnippetDto.getLastModifiedData(), "The last modified date of the returned snippet should match the last modified date of the saved snippet");
+        assertTrue(actualUpdatedSnippetDto.getTags().isEmpty(), "The tags of the returned snippet should be empty");
 
         // 3. Verify repository interactions
         verify(snippetRepositoryMock, times(1)).findById(snippetId);
@@ -237,11 +307,11 @@ public class SnippetServiceTest {
         // When findById is called, return an empty optional
         when(snippetRepositoryMock.findById(nonExistentId)).thenReturn(Optional.empty());
 
-        Optional<Snippet> actualUpdatedSnippetOptional = snippetService.updateSnippet(nonExistentId, snippetUpdateDetails);
+        Optional<SnippetResponseDto> actualUpdatedSnippetDtoOptional = snippetService.updateSnippet(nonExistentId, snippetUpdateDetails);
 
         // 1. Check that the returned optional is empty
-        assertNotNull(actualUpdatedSnippetOptional, "The returned optional should not be null");
-        assertTrue(actualUpdatedSnippetOptional.isEmpty(), "The returned optional should be empty");
+        assertNotNull(actualUpdatedSnippetDtoOptional, "The returned optional should not be null");
+        assertTrue(actualUpdatedSnippetDtoOptional.isEmpty(), "The returned optional should be empty");
 
         // 2. Verify that findById was called
         verify(snippetRepositoryMock, times(1)).findById(nonExistentId);
