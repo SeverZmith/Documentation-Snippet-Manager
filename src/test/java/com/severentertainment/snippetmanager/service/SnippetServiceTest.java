@@ -1,7 +1,11 @@
 package com.severentertainment.snippetmanager.service;
 
 import com.severentertainment.snippetmanager.domain.Snippet;
+import com.severentertainment.snippetmanager.domain.Tag;
+import com.severentertainment.snippetmanager.dto.SnippetResponseDto;
+import com.severentertainment.snippetmanager.dto.TagResponseDto;
 import com.severentertainment.snippetmanager.repository.SnippetRepository;
+import com.severentertainment.snippetmanager.repository.TagRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -10,10 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -23,6 +24,9 @@ public class SnippetServiceTest {
 
     @Mock
     private SnippetRepository snippetRepositoryMock;
+
+    @Mock
+    private TagRepository tagRepositoryMock;
 
     @InjectMocks
     private SnippetService snippetService;
@@ -285,6 +289,294 @@ public class SnippetServiceTest {
 
         // 3. Verify that deleteById was NOT called
         verify(snippetRepositoryMock, never()).deleteById(anyLong());
+    }
+
+    @Test
+    public void addTagToSnippet_shouldAddTagAndReturnUpdatedSnippetDto_whenSnippetAndTagExist() {
+        Long snippetId = 1L;
+        Long tagId = 2L;
+
+        // Simulate existing snippet without tags
+        Snippet existingSnippetEntity = new Snippet();
+        existingSnippetEntity.setId(snippetId);
+        existingSnippetEntity.setTitle("Snippet to tag");
+        existingSnippetEntity.setContent("Some Content");
+        existingSnippetEntity.setCreationData(Instant.now().minusSeconds(100));
+        existingSnippetEntity.setLastModifiedData(Instant.now().minusSeconds(100));
+        existingSnippetEntity.setTags(new HashSet<>());
+
+        // Simulate existing tag
+        Tag existingTagEntity = new Tag();
+        existingTagEntity.setId(tagId);
+        existingTagEntity.setName("java");
+
+        // Configure mock repository behavior:
+        //  - findById should return the existing snippet entity
+        when(snippetRepositoryMock.findById(snippetId)).thenReturn(Optional.of(existingSnippetEntity));
+        //  - findById should return the existing tag entity
+        when(tagRepositoryMock.findById(tagId)).thenReturn(Optional.of(existingTagEntity));
+        //  - save should return the existing snippet entity with the new tag added
+        when(snippetRepositoryMock.save(existingSnippetEntity)).thenReturn(existingSnippetEntity);
+
+        // Call the method under test
+        Optional<SnippetResponseDto> resultOptional = snippetService.addTagToSnippet(snippetId, tagId);
+
+        // 1. Check that the result optional is present
+        assertTrue(resultOptional.isPresent(), "The result optional should not be empty");
+        SnippetResponseDto resultDto = resultOptional.get();
+
+        // 2. Check that the returned DTO has the correct properties
+        assertEquals(snippetId, resultDto.getId(), "The ID of the returned DTO should match the ID of the snippet");
+        assertEquals(existingSnippetEntity.getTitle(), resultDto.getTitle(), "The title of the returned DTO should match the title of the snippet");
+
+        // 3. Check that the returned DTO has the correct tags
+        assertNotNull(resultDto.getTags(), "The tags of the returned DTO should not be null");
+        assertEquals(1, resultDto.getTags().size(), "Tags set in DTO should have 1 element");
+
+        TagResponseDto addedTagDto = resultDto.getTags().iterator().next();
+        assertEquals(existingTagEntity.getId(), addedTagDto.getId(), "The ID of the added tag should match the ID of the tag");
+        assertEquals(existingTagEntity.getName(), addedTagDto.getName(), "The name of the added tag should match the name of the tag");
+
+        // 4. Verify that findById was called for both repositories once
+        verify(snippetRepositoryMock, times(1)).findById(snippetId);
+        verify(tagRepositoryMock, times(1)).findById(tagId);
+
+        // 5. Verify that save was called once with the correct snippet entity
+        ArgumentCaptor<Snippet> snippetArgumentCaptor = ArgumentCaptor.forClass(Snippet.class);
+        verify(snippetRepositoryMock, times(1)).save(snippetArgumentCaptor.capture());
+
+        Snippet savedSnippet = snippetArgumentCaptor.getValue();
+        assertTrue(savedSnippet.getTags().contains(existingTagEntity), "The saved snippet should contain the added tag");
+        assertEquals(1, savedSnippet.getTags().size(), "The saved snippet should have 1 tag");
+    }
+
+    @Test
+    public void removeTagFromSnippet_shouldRemoveTagAndReturnUpdatedSnippetDto_whenAssociated() {
+        Long snippetId = 1L;
+        Long tagId = 2L;
+
+        Tag tagToRemove = new Tag();
+        tagToRemove.setId(tagId);
+        tagToRemove.setName("java");
+
+        // Simulate existing snippet with a tag
+        Snippet snippetEntity = new Snippet();
+        snippetEntity.setId(snippetId);
+        snippetEntity.setTitle("Snippet with tag");
+        snippetEntity.getTags().add(tagToRemove);
+
+        // Configure mock repository behavior:
+        //  - findById should return the existing snippet entity
+        when(snippetRepositoryMock.findById(snippetId)).thenReturn(Optional.of(snippetEntity));
+        //  - findById should return the existing tag to remove
+        when(tagRepositoryMock.findById(tagId)).thenReturn(Optional.of(tagToRemove));
+        //  - save should return the existing snippet entity with the tag removed
+        when(snippetRepositoryMock.save(snippetEntity)).thenReturn(snippetEntity);
+
+        // Call the method under test
+        Optional<SnippetResponseDto> resultOptional = snippetService.removeTagFromSnippet(snippetId, tagId);
+
+        // 1. Check that the result optional is present
+        assertTrue(resultOptional.isPresent(), "The result optional should not be empty");
+        SnippetResponseDto resultDto = resultOptional.get();
+
+        // 2. Check that the returned DTO does not contain the removed tag
+        assertEquals(snippetId, resultDto.getId(), "The ID of the returned DTO should match the ID of the snippet");
+        assertTrue(resultDto.getTags().isEmpty(), "The tags set in the returned DTO should be empty");
+
+        // 3. Verify that findById was called for both repositories once
+        verify(snippetRepositoryMock, times(1)).findById(snippetId);
+        verify(tagRepositoryMock, times(1)).findById(tagId);
+
+        // 4. Verify that save was called once with the correct snippet entity
+        ArgumentCaptor<Snippet> snippetArgumentCaptor = ArgumentCaptor.forClass(Snippet.class);
+        verify(snippetRepositoryMock, times(1)).save(snippetArgumentCaptor.capture());
+
+        Snippet savedSnippet = snippetArgumentCaptor.getValue();
+        assertFalse(savedSnippet.getTags().contains(tagToRemove), "The saved snippet should not contain the removed tag");
+        assertTrue(savedSnippet.getTags().isEmpty(), "The saved snippet should have no tags");
+    }
+
+    @Test
+    public void removeTagFromSnippet_shouldReturnDtoWithoutCallingSave_whenTagNotAssociated() {
+        Long snippetId = 1L;
+        Long tagId = 2L;
+
+        Tag tagToAttemptRemoval = new Tag();
+        tagToAttemptRemoval.setId(tagId);
+        tagToAttemptRemoval.setName("non-associated-tag");
+
+        // Simulate existing snippet without tags
+        Snippet snippetEntity = new Snippet();
+        snippetEntity.setId(snippetId);
+        snippetEntity.setTitle("Snippet without tag");
+        snippetEntity.setTags(new HashSet<>());
+
+        // Configure mock repository behavior:
+        //  - findById should return the existing snippet entity
+        when(snippetRepositoryMock.findById(snippetId)).thenReturn(Optional.of(snippetEntity));
+        //  - findById should return the tag to remove
+        when(tagRepositoryMock.findById(tagId)).thenReturn(Optional.of(tagToAttemptRemoval));
+
+        // Call the method under test
+        Optional<SnippetResponseDto> resultOptional = snippetService.removeTagFromSnippet(snippetId, tagId);
+
+        // 1. Check that the result optional is present
+        assertTrue(resultOptional.isPresent(), "The result optional should not be empty");
+        SnippetResponseDto resultDto = resultOptional.get();
+
+        // 2. Check that the returned DTO does not contain tags
+        assertEquals(snippetId, resultDto.getId(), "The ID of the returned DTO should match the ID of the snippet");
+        assertTrue(resultDto.getTags().isEmpty(), "The tags set in the returned DTO should be empty");
+
+        // 3. Verify that findById was called for both repositories once
+        verify(snippetRepositoryMock, times(1)).findById(snippetId);
+        verify(tagRepositoryMock, times(1)).findById(tagId);
+
+        // 4. Verify that save was NOT called
+        verify(snippetRepositoryMock, never()).save(any(Snippet.class));
+    }
+
+    @Test
+    public void removeTagFromSnippet_shouldReturnEmptyOptional_whenSnippetDoesNotExist() {
+        Long nonExistentId = 1L;
+        Long existingTagId = 2L;
+
+        // Configure mock repository behavior:
+        //  - findById should return an empty optional, simulating snippet not found
+        when(snippetRepositoryMock.findById(nonExistentId)).thenReturn(Optional.empty());
+
+        // Call the method under test
+        Optional<SnippetResponseDto> resultOptional = snippetService.removeTagFromSnippet(nonExistentId, existingTagId);
+
+        // 1. Check that the optional is empty
+        assertTrue(resultOptional.isEmpty(), "The result optional should be empty");
+
+        // 2. Verify that snippet repository's findById was called once
+        verify(snippetRepositoryMock, times(1)).findById(nonExistentId);
+
+        // 3. Verify that snippet repository save was NOT called
+        verify(snippetRepositoryMock, never()).save(any(Snippet.class));
+    }
+
+    @Test
+    public void removeTagFromSnippet_shouldReturnEmptyOptional_whenTagDoesNotExist() {
+        Long existingSnippetId = 1L;
+        Long nonExistentTagId = 2L;
+
+        // Simulate an existing snippet
+        Snippet existingSnippetEntity = new Snippet();
+        existingSnippetEntity.setId(existingSnippetId);
+        existingSnippetEntity.setTitle("Test Snippet");
+        existingSnippetEntity.setTags(new HashSet<>());
+
+        // Configure mock repository behavior:
+        //  - findById should return the existing snippet
+        when(snippetRepositoryMock.findById(existingSnippetId)).thenReturn(Optional.of(existingSnippetEntity));
+        //  - findById should return an empty optional for the non-existent tag
+        when(tagRepositoryMock.findById(nonExistentTagId)).thenReturn(Optional.empty());
+
+        // Call the method under test
+        Optional<SnippetResponseDto> resultOptional = snippetService.removeTagFromSnippet(existingSnippetId, nonExistentTagId);
+
+        // 1. Check that the optional is empty
+        assertTrue(resultOptional.isEmpty(), "The result optional should be empty");
+
+        // 2. Verify that findById was called on both repositories once
+        verify(snippetRepositoryMock, times(1)).findById(existingSnippetId);
+        verify(tagRepositoryMock, times(1)).findById(nonExistentTagId);
+
+        // 3. Verify that save was never called
+        verify(snippetRepositoryMock, never()).save(any(Snippet.class));
+    }
+
+    @Test
+    public void getTagsForSnippet_shouldReturnTagDtos_whenSnippetExistsAndHasTags() {
+        Long snippetId = 1L;
+
+        // Simulate tag entities
+        Tag tagEntity1 = new Tag();
+        tagEntity1.setId(2L);
+        tagEntity1.setName("java");
+
+        Tag tagEntity2 = new Tag();
+        tagEntity2.setId(3L);
+        tagEntity2.setName("guava");
+
+        // Simulate the snippet with associated tags
+        Snippet snippetEntityWithTags = new Snippet();
+        snippetEntityWithTags.setId(snippetId);
+        snippetEntityWithTags.setTitle("Snippet with tags");
+        snippetEntityWithTags.getTags().add(tagEntity1);
+        snippetEntityWithTags.getTags().add(tagEntity2);
+
+        // Configure mock repository behavior:
+        //  - findById should return the snippet with tags
+        when(snippetRepositoryMock.findById(snippetId)).thenReturn(Optional.of(snippetEntityWithTags));
+
+        // Call the method under test
+        Optional<Set<TagResponseDto>> resultOptional = snippetService.getTagsForSnippet(snippetId);
+
+        // 1. Check that the optional is present
+        assertTrue(resultOptional.isPresent(), "The result optional should not be empty");
+        Set<TagResponseDto> resultTags = resultOptional.get();
+
+        // 2. Check the size of the DTOs matches the number of simulated tags
+        assertEquals(2, resultTags.size(), "The number of tags in the result should match the number of tags in the snippet");
+
+        // 3. Check that the DTOs contents are equivalent to the tag entities
+        assertTrue(resultTags.stream().anyMatch(tag -> tag.getId().equals(tagEntity1.getId()) && tag.getName().equals(tagEntity1.getName())), "The result should contain the first tag");
+        assertTrue(resultTags.stream().anyMatch(tag -> tag.getId().equals(tagEntity2.getId()) && tag.getName().equals(tagEntity2.getName())), "The result should contain the second tag");
+
+        // 4. Verify that findById was called once
+        verify(snippetRepositoryMock, times(1)).findById(snippetId);
+    }
+
+    @Test
+    public void getTagsForSnippet_shouldReturnEmptyOptional_whenSnippetExistsButHasNoTags() {
+        Long snippetId = 1L;
+
+        // Simulate snippet without tags
+        Snippet snippetEntityWithNoTags = new Snippet();
+        snippetEntityWithNoTags.setId(snippetId);
+        snippetEntityWithNoTags.setTitle("Snippet with no tags");
+        snippetEntityWithNoTags.setTags(new HashSet<>());
+
+        // Configure mock repository behavior:
+        //  - findById should return the snippet without tags
+        when(snippetRepositoryMock.findById(snippetId)).thenReturn(Optional.of(snippetEntityWithNoTags));
+
+        // Call the method under test
+        Optional<Set<TagResponseDto>> resultOptional = snippetService.getTagsForSnippet(snippetId);
+
+        // 1. Check that the optional is present
+        assertTrue(resultOptional.isPresent(), "The result optional should not be empty");
+        Set<TagResponseDto> resultTags = resultOptional.get();
+
+        // 2. Check that the set of DTOs is empty
+        assertNotNull(resultTags, "The result should not be null");
+        assertTrue(resultTags.isEmpty(), "The result should be empty");
+
+        // 3. Verify that findById is called once
+        verify(snippetRepositoryMock, times(1)).findById(snippetId);
+    }
+
+    @Test
+    public void getTagsForSnippet_shouldReturnEmptyOptional_whenSnippetDoesNotExist() {
+        Long nonExistentSnippetId = 1L;
+
+        // Configure mock repository behavior:
+        //  - findById should return an empty optional
+        when(snippetRepositoryMock.findById(nonExistentSnippetId)).thenReturn(Optional.empty());
+
+        // Call the method under test
+        Optional<Set<TagResponseDto>> resultOptional = snippetService.getTagsForSnippet(nonExistentSnippetId);
+
+        // 1. Check that the optional is empty
+        assertTrue(resultOptional.isEmpty(), "The result optional should be empty");
+
+        // 2. Verify that findById is called once
+        verify(snippetRepositoryMock, times(1)).findById(nonExistentSnippetId);
     }
 
 }
