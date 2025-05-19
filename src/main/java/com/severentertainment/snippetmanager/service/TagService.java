@@ -1,9 +1,12 @@
 package com.severentertainment.snippetmanager.service;
 
+import com.severentertainment.snippetmanager.domain.Snippet;
 import com.severentertainment.snippetmanager.domain.Tag;
+import com.severentertainment.snippetmanager.repository.SnippetRepository;
 import com.severentertainment.snippetmanager.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Locale;
@@ -26,6 +29,7 @@ public class TagService {
      * @param tag The tag object containing the name for the Tag to be created.
      * @return The created or existing Tag.
      */
+    @Transactional
     public Tag createOrGetTag(Tag tag) {
         if (tag.getName() == null || tag.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Tag name for create cannot be null or empty");
@@ -51,6 +55,7 @@ public class TagService {
      *
      * @return A list of all tags.
      */
+    @Transactional(readOnly = true)
     public List<Tag> getAllTags() {
         return tagRepository.findAll();
     }
@@ -61,6 +66,7 @@ public class TagService {
      * @param id The ID of the tag to retrieve.
      * @return An Optional containing the Tag if found, or an empty Optional if not.
      */
+    @Transactional(readOnly = true)
     public Optional<Tag> getTagById(Long id) {
         return tagRepository.findById(id);
     }
@@ -74,6 +80,7 @@ public class TagService {
      * @param tagDetails A Tag object containing the new name for the tag.
      * @return An Optional containing the updated Tag if successful, or an empty Optional if not.
      */
+    @Transactional
     public Optional<Tag> updateTag(Long id, Tag tagDetails) {
         if (tagDetails.getName() == null || tagDetails.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Tag name for update cannot be null or empty");
@@ -103,6 +110,7 @@ public class TagService {
      * @param id The ID of the tag to delete.
      * @return True if the tag was deleted, false if not.
      */
+    @Transactional
     public boolean deleteTag(Long id) {
         if (tagRepository.existsById(id)) {
             tagRepository.deleteById(id);

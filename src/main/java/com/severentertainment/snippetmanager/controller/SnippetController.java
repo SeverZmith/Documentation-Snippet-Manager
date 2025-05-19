@@ -1,6 +1,7 @@
 package com.severentertainment.snippetmanager.controller;
 
 import com.severentertainment.snippetmanager.domain.Snippet;
+import com.severentertainment.snippetmanager.domain.Tag;
 import com.severentertainment.snippetmanager.service.SnippetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/snippets")
@@ -98,6 +100,55 @@ public class SnippetController {
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 404 Not Found
         }
+    }
+
+    /**
+     * Handles HTTP GET requests for retrieving all tags associated with a snippet.
+     *
+     * @param snippetId The ID of the snippet.
+     * @return A {@link ResponseEntity} containing the {@link Set} of {@link Tag} objects
+     * and an HTTP status code of 200 (OK) if the snippet was found.
+     * Otherwise, an HTTP status code of 404 (Not Found) is returned if the snippet does not exist.
+     */
+    @GetMapping("/{snippetId}/tags")
+    public ResponseEntity<Set<Tag>> getTagsForSnippet(@PathVariable Long snippetId) {
+        Optional<Set<Tag>> tagsOptional = snippetService.getTagsForSnippet(snippetId);
+        return tagsOptional
+                .map(tags -> new ResponseEntity<>(tags, HttpStatus.OK))
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    /**
+     * Handles HTTP POST requests for associating a tag with a snippet.
+     *
+     * @param snippetId The ID of the snippet to associate with.
+     * @param tagId The ID of the tag to associate.
+     * @return A {@link ResponseEntity} with an HTTP status code of 200 (OK) if the association was successful,
+     * or an HTTP status code of 404 (Not Found) if the snippet or tag could not be found.
+     */
+    @PostMapping("/{snippetId}/tags/{tagId}")
+    public ResponseEntity<Snippet> associateTagWithSnippet(@PathVariable Long snippetId, @PathVariable Long tagId) {
+        Optional<Snippet> updatedSnippetOptional = snippetService.addTagToSnippet(snippetId, tagId);
+        return updatedSnippetOptional
+                .map(snippet -> new ResponseEntity<>(snippet, HttpStatus.OK))
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    /**
+     * Handles HTTP DELETE requests for disassociating a tag from a snippet.
+     *
+     * @param snippetId The ID of the snippet to disassociate from.
+     * @param tagId The ID of the tag to disassociate.
+     * @return A {@link ResponseEntity} with an HTTP status code of 200 (OK) if the disassociation was successful,
+     * or an HTTP status code of 404 (Not Found) if the snippet or tag could not be found
+     * or if the tag was not associated with the snippet.
+     */
+    @DeleteMapping("/{snippetId}/tags/{tagId}")
+    public ResponseEntity<Snippet> disassociateTagFromSnippet(@PathVariable Long snippetId, @PathVariable Long tagId) {
+        Optional<Snippet> updatedSnippetOptional = snippetService.removeTagFromSnippet(snippetId, tagId);
+        return updatedSnippetOptional
+                .map(snippet -> new ResponseEntity<>(snippet, HttpStatus.OK))
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
 }
