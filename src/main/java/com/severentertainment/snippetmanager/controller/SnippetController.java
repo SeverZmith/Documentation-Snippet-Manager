@@ -30,7 +30,7 @@ public class SnippetController {
      * The snippet data is expected in the request body as JSON.
      *
      * @param snippet The {@link Snippet} object derived from the JSON request body.
-     *                The ID, creationDate, and lastModifiedData fields should be null or will be ignored.
+     *                The ID, creationDate, and lastModifiedDate fields should be null or will be ignored.
      * @return A {@link ResponseEntity} containing the created {@link Snippet} and an HTTP status code of 201 (Created).
      */
     @PostMapping

@@ -55,8 +55,8 @@ public class EntityToDtoMapper {
                 snippet.getId(),
                 snippet.getTitle(),
                 snippet.getContent(),
-                snippet.getCreationData(),
-                snippet.getLastModifiedData(),
+                snippet.getCreationDate(),
+                snippet.getLastModifiedDate(),
                 tagsToTagResponseDtos(snippet.getTags())
         );
     }

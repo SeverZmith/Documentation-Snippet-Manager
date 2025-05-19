@@ -68,7 +68,7 @@ public class SnippetService {
     /**
      * Updates an existing snippet.
      * If a snippet with the given ID is found, its title and content are updated.
-     * The lastModifiedData timestamp is automatically updated by Hibernate's @UpdateTimestamp.
+     * The lastModifiedDate timestamp is automatically updated by Hibernate's @UpdateTimestamp.
      *
      * @param id The ID of the snippet to update.
      * @param snippetDetails A {@link Snippet} object containing the new title and content for the snippet.

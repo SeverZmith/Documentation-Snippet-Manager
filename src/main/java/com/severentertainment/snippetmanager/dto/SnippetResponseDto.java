@@ -16,8 +16,8 @@ public class SnippetResponseDto {
     private Long id;
     private String title;
     private String content;
-    private Instant creationData;
-    private Instant lastModifiedData;
+    private Instant creationDate;
+    private Instant lastModifiedDate;
     private Set<TagResponseDto> tags = new HashSet<>();
 
 }

@@ -1,7 +1,6 @@
 package com.severentertainment.snippetmanager.domain;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,10 +28,10 @@ public class Snippet {
     private String content;
 
     @CreationTimestamp
-    private Instant creationData;
+    private Instant creationDate;
 
     @UpdateTimestamp
-    private Instant lastModifiedData;
+    private Instant lastModifiedDate;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(

@@ -38,16 +38,16 @@ public class SnippetServiceTest {
         snippet1.setId(1L);
         snippet1.setTitle("First Snippet");
         snippet1.setContent("Content of first snippet");
-        snippet1.setCreationData(Instant.now());
-        snippet1.setLastModifiedData(Instant.now());
+        snippet1.setCreationDate(Instant.now());
+        snippet1.setLastModifiedDate(Instant.now());
         snippet1.setTags(new HashSet<>());
 
         Snippet snippet2 = new Snippet();
         snippet2.setId(2L);
         snippet2.setTitle("Second Snippet");
         snippet2.setContent("Content of second snippet");
-        snippet2.setCreationData(Instant.now());
-        snippet2.setLastModifiedData(Instant.now());
+        snippet2.setCreationDate(Instant.now());
+        snippet2.setLastModifiedDate(Instant.now());
         snippet2.setTags(new HashSet<>());
 
         List<Snippet> expectedSnippets = Arrays.asList(snippet1, snippet2);
@@ -57,8 +57,8 @@ public class SnippetServiceTest {
                 snippet1.getId(),
                 snippet1.getTitle(),
                 snippet1.getContent(),
-                snippet1.getCreationData(),
-                snippet1.getLastModifiedData(),
+                snippet1.getCreationDate(),
+                snippet1.getLastModifiedDate(),
                 new HashSet<>()
         );
 
@@ -66,8 +66,8 @@ public class SnippetServiceTest {
                 snippet2.getId(),
                 snippet2.getTitle(),
                 snippet2.getContent(),
-                snippet2.getCreationData(),
-                snippet2.getLastModifiedData(),
+                snippet2.getCreationDate(),
+                snippet2.getLastModifiedDate(),
                 new HashSet<>()
         );
 
@@ -119,8 +119,8 @@ public class SnippetServiceTest {
         expectedSnippet.setId(1L);
         expectedSnippet.setTitle("First Snippet");
         expectedSnippet.setContent("Content of first snippet");
-        expectedSnippet.setCreationData(Instant.now());
-        expectedSnippet.setLastModifiedData(Instant.now());
+        expectedSnippet.setCreationDate(Instant.now());
+        expectedSnippet.setLastModifiedDate(Instant.now());
         expectedSnippet.setTags(new HashSet<>());
 
         // Configure the mock repository to return the expected snippet when findById is called
@@ -130,8 +130,8 @@ public class SnippetServiceTest {
                 expectedSnippet.getId(),
                 expectedSnippet.getTitle(),
                 expectedSnippet.getContent(),
-                expectedSnippet.getCreationData(),
-                expectedSnippet.getLastModifiedData(),
+                expectedSnippet.getCreationDate(),
+                expectedSnippet.getLastModifiedDate(),
                 new HashSet<>()
         );
 
@@ -146,8 +146,8 @@ public class SnippetServiceTest {
         assertEquals(expectedSnippetDto.getId(), actualSnippetDto.getId(), "The ID of the returned snippet should match the ID of the expected snippet");
         assertEquals(expectedSnippetDto.getTitle(), actualSnippetDto.getTitle(), "The title of the returned snippet should match the title of the expected snippet");
         assertEquals(expectedSnippetDto.getContent(), actualSnippetDto.getContent(), "The content of the returned snippet should match the content of the expected snippet");
-        assertEquals(expectedSnippetDto.getCreationData(), actualSnippetDto.getCreationData(), "The creation date of the returned snippet should match the creation date of the expected snippet");
-        assertEquals(expectedSnippetDto.getLastModifiedData(), actualSnippetDto.getLastModifiedData(), "The last modified date of the returned snippet should match the last modified date of the expected snippet");
+        assertEquals(expectedSnippetDto.getCreationDate(), actualSnippetDto.getCreationDate(), "The creation date of the returned snippet should match the creation date of the expected snippet");
+        assertEquals(expectedSnippetDto.getLastModifiedDate(), actualSnippetDto.getLastModifiedDate(), "The last modified date of the returned snippet should match the last modified date of the expected snippet");
         assertTrue(actualSnippetDto.getTags().isEmpty(), "The tags of the returned snippet should be empty");
 
         // 3. Verify that findById was called once
@@ -180,16 +180,16 @@ public class SnippetServiceTest {
         savedSnippetFromRepo.setId(1L);
         savedSnippetFromRepo.setTitle(snippetToCreate.getTitle());
         savedSnippetFromRepo.setContent(snippetToCreate.getContent());
-        savedSnippetFromRepo.setCreationData(Instant.now());
-        savedSnippetFromRepo.setLastModifiedData(Instant.now());
+        savedSnippetFromRepo.setCreationDate(Instant.now());
+        savedSnippetFromRepo.setLastModifiedDate(Instant.now());
         savedSnippetFromRepo.setTags(new HashSet<>());
 
         SnippetResponseDto expectedSnippetDto = new SnippetResponseDto(
                 savedSnippetFromRepo.getId(),
                 savedSnippetFromRepo.getTitle(),
                 savedSnippetFromRepo.getContent(),
-                savedSnippetFromRepo.getCreationData(),
-                savedSnippetFromRepo.getLastModifiedData(),
+                savedSnippetFromRepo.getCreationDate(),
+                savedSnippetFromRepo.getLastModifiedDate(),
                 new HashSet<>()
         );
 
@@ -206,8 +206,8 @@ public class SnippetServiceTest {
         assertEquals(expectedSnippetDto.getId(), actualCreatedSnippetDto.getId(), "The ID of the returned snippet should match the ID of the saved snippet");
         assertEquals(expectedSnippetDto.getTitle(), actualCreatedSnippetDto.getTitle(), "The title of the returned snippet should match the title of the saved snippet");
         assertEquals(expectedSnippetDto.getContent(), actualCreatedSnippetDto.getContent(), "The content of the returned snippet should match the content of the saved snippet");
-        assertEquals(expectedSnippetDto.getCreationData(), actualCreatedSnippetDto.getCreationData(), "The creation date of the returned snippet should match the creation date of the saved snippet");
-        assertEquals(expectedSnippetDto.getLastModifiedData(), actualCreatedSnippetDto.getLastModifiedData(), "The last modified date of the returned snippet should match the last modified date of the saved snippet");
+        assertEquals(expectedSnippetDto.getCreationDate(), actualCreatedSnippetDto.getCreationDate(), "The creation date of the returned snippet should match the creation date of the saved snippet");
+        assertEquals(expectedSnippetDto.getLastModifiedDate(), actualCreatedSnippetDto.getLastModifiedDate(), "The last modified date of the returned snippet should match the last modified date of the saved snippet");
         assertTrue(actualCreatedSnippetDto.getTags().isEmpty(), "The tags of the returned snippet should be empty");
 
         // 3. Verify that save was called once with the correct snippet
@@ -218,8 +218,8 @@ public class SnippetServiceTest {
         assertEquals(snippetToCreate.getTitle(), snippetPassedToRepository.getTitle(), "The title of the snippet passed to the repository should match the title of the snippet to create");
         assertEquals(snippetToCreate.getContent(), snippetPassedToRepository.getContent(), "The content of the snippet passed to the repository should match the content of the snippet to create");
         assertNull(snippetPassedToRepository.getId(), "The ID of the snippet passed to the repository should be null");
-        assertNull(snippetPassedToRepository.getCreationData(), "The creation date of the snippet passed to the repository should be null");
-        assertNull(snippetPassedToRepository.getLastModifiedData(), "The last modified date of the snippet passed to the repository should be null");
+        assertNull(snippetPassedToRepository.getCreationDate(), "The creation date of the snippet passed to the repository should be null");
+        assertNull(snippetPassedToRepository.getLastModifiedDate(), "The last modified date of the snippet passed to the repository should be null");
     }
 
     @Test
@@ -233,8 +233,8 @@ public class SnippetServiceTest {
         existingSnippet.setId(snippetId);
         existingSnippet.setTitle("Existing Snippet");
         existingSnippet.setContent("Content of existing snippet");
-        existingSnippet.setCreationData(initialCreationDate);
-        existingSnippet.setLastModifiedData(initialUpdateDate);
+        existingSnippet.setCreationDate(initialCreationDate);
+        existingSnippet.setLastModifiedDate(initialUpdateDate);
         existingSnippet.setTags(new HashSet<>());
 
         // Represents the new data coming in
@@ -247,8 +247,8 @@ public class SnippetServiceTest {
         savedSnippetAfterUpdate.setId(snippetId);
         savedSnippetAfterUpdate.setTitle(snippetUpdateDetails.getTitle());
         savedSnippetAfterUpdate.setContent(snippetUpdateDetails.getContent());
-        savedSnippetAfterUpdate.setCreationData(initialCreationDate);
-        savedSnippetAfterUpdate.setLastModifiedData(Instant.now());
+        savedSnippetAfterUpdate.setCreationDate(initialCreationDate);
+        savedSnippetAfterUpdate.setLastModifiedDate(Instant.now());
         savedSnippetAfterUpdate.setTags(new HashSet<>());
 
         // Simulate expected DTO
@@ -256,8 +256,8 @@ public class SnippetServiceTest {
                 snippetId,
                 snippetUpdateDetails.getTitle(),
                 snippetUpdateDetails.getContent(),
-                savedSnippetAfterUpdate.getCreationData(),
-                savedSnippetAfterUpdate.getLastModifiedData(),
+                savedSnippetAfterUpdate.getCreationDate(),
+                savedSnippetAfterUpdate.getLastModifiedDate(),
                 new HashSet<>()
         );
 
@@ -278,8 +278,8 @@ public class SnippetServiceTest {
         assertEquals(expectedSnippetDto.getId(), actualUpdatedSnippetDto.getId(), "The ID of the returned snippet should match the ID of the saved snippet");
         assertEquals(expectedSnippetDto.getTitle(), actualUpdatedSnippetDto.getTitle(), "The title of the returned snippet should match the title of the saved snippet");
         assertEquals(expectedSnippetDto.getContent(), actualUpdatedSnippetDto.getContent(), "The content of the returned snippet should match the content of the saved snippet");
-        assertEquals(expectedSnippetDto.getCreationData(), actualUpdatedSnippetDto.getCreationData(), "The creation date of the returned snippet should match the creation date of the saved snippet");
-        assertEquals(expectedSnippetDto.getLastModifiedData(), actualUpdatedSnippetDto.getLastModifiedData(), "The last modified date of the returned snippet should match the last modified date of the saved snippet");
+        assertEquals(expectedSnippetDto.getCreationDate(), actualUpdatedSnippetDto.getCreationDate(), "The creation date of the returned snippet should match the creation date of the saved snippet");
+        assertEquals(expectedSnippetDto.getLastModifiedDate(), actualUpdatedSnippetDto.getLastModifiedDate(), "The last modified date of the returned snippet should match the last modified date of the saved snippet");
         assertTrue(actualUpdatedSnippetDto.getTags().isEmpty(), "The tags of the returned snippet should be empty");
 
         // 3. Verify repository interactions
@@ -371,8 +371,8 @@ public class SnippetServiceTest {
         existingSnippetEntity.setId(snippetId);
         existingSnippetEntity.setTitle("Snippet to tag");
         existingSnippetEntity.setContent("Some Content");
-        existingSnippetEntity.setCreationData(Instant.now().minusSeconds(100));
-        existingSnippetEntity.setLastModifiedData(Instant.now().minusSeconds(100));
+        existingSnippetEntity.setCreationDate(Instant.now().minusSeconds(100));
+        existingSnippetEntity.setLastModifiedDate(Instant.now().minusSeconds(100));
         existingSnippetEntity.setTags(new HashSet<>());
 
         // Simulate existing tag
