@@ -39,7 +39,7 @@ public class TagService {
         }
 
         // Normalize the tag name: trim whitespace and convert to lowercase
-        String normalizedTagName = tag.getName().trim().toLowerCase(Locale.ROOT);
+        String normalizedTagName = tag.getName().trim().toLowerCase(Locale.ROOT).replaceAll("\\s+", " ");
 
         // Check if a tag with this name already exists
         Optional<Tag> existingTag = tagRepository.findByNameIgnoreCase(normalizedTagName);
@@ -100,7 +100,7 @@ public class TagService {
             return Optional.empty(); // Tag to update not found
         }
 
-        String newNormalizedName = tagDetails.getName().trim().toLowerCase(Locale.ROOT);
+        String newNormalizedName = tagDetails.getName().trim().toLowerCase(Locale.ROOT).replaceAll("\\s+", " ");
 
         // Check if a tag with this name already exists, excluding the one to update
         Optional<Tag> conflictingTag = tagRepository.findByNameIgnoreCase(newNormalizedName);
