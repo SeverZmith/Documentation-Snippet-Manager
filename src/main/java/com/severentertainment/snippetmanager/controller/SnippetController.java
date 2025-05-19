@@ -2,6 +2,8 @@ package com.severentertainment.snippetmanager.controller;
 
 import com.severentertainment.snippetmanager.domain.Snippet;
 import com.severentertainment.snippetmanager.domain.Tag;
+import com.severentertainment.snippetmanager.dto.SnippetResponseDto;
+import com.severentertainment.snippetmanager.dto.TagResponseDto;
 import com.severentertainment.snippetmanager.service.SnippetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -111,8 +113,8 @@ public class SnippetController {
      * Otherwise, an HTTP status code of 404 (Not Found) is returned if the snippet does not exist.
      */
     @GetMapping("/{snippetId}/tags")
-    public ResponseEntity<Set<Tag>> getTagsForSnippet(@PathVariable Long snippetId) {
-        Optional<Set<Tag>> tagsOptional = snippetService.getTagsForSnippet(snippetId);
+    public ResponseEntity<Set<TagResponseDto>> getTagsForSnippet(@PathVariable Long snippetId) {
+        Optional<Set<TagResponseDto>> tagsOptional = snippetService.getTagsForSnippet(snippetId);
         return tagsOptional
                 .map(tags -> new ResponseEntity<>(tags, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
@@ -127,9 +129,9 @@ public class SnippetController {
      * or an HTTP status code of 404 (Not Found) if the snippet or tag could not be found.
      */
     @PostMapping("/{snippetId}/tags/{tagId}")
-    public ResponseEntity<Snippet> associateTagWithSnippet(@PathVariable Long snippetId, @PathVariable Long tagId) {
-        Optional<Snippet> updatedSnippetOptional = snippetService.addTagToSnippet(snippetId, tagId);
-        return updatedSnippetOptional
+    public ResponseEntity<SnippetResponseDto> associateTagWithSnippet(@PathVariable Long snippetId, @PathVariable Long tagId) {
+        Optional<SnippetResponseDto> updatedSnippetDtoOptional = snippetService.addTagToSnippet(snippetId, tagId);
+        return updatedSnippetDtoOptional
                 .map(snippet -> new ResponseEntity<>(snippet, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
@@ -144,9 +146,9 @@ public class SnippetController {
      * or if the tag was not associated with the snippet.
      */
     @DeleteMapping("/{snippetId}/tags/{tagId}")
-    public ResponseEntity<Snippet> disassociateTagFromSnippet(@PathVariable Long snippetId, @PathVariable Long tagId) {
-        Optional<Snippet> updatedSnippetOptional = snippetService.removeTagFromSnippet(snippetId, tagId);
-        return updatedSnippetOptional
+    public ResponseEntity<SnippetResponseDto> disassociateTagFromSnippet(@PathVariable Long snippetId, @PathVariable Long tagId) {
+        Optional<SnippetResponseDto> updatedSnippetDtoOptional = snippetService.removeTagFromSnippet(snippetId, tagId);
+        return updatedSnippetDtoOptional
                 .map(snippet -> new ResponseEntity<>(snippet, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }

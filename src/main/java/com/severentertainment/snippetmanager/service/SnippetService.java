@@ -2,6 +2,9 @@ package com.severentertainment.snippetmanager.service;
 
 import com.severentertainment.snippetmanager.domain.Snippet;
 import com.severentertainment.snippetmanager.domain.Tag;
+import com.severentertainment.snippetmanager.dto.SnippetResponseDto;
+import com.severentertainment.snippetmanager.dto.TagResponseDto;
+import com.severentertainment.snippetmanager.dto.EntityToDtoMapper;
 import com.severentertainment.snippetmanager.repository.SnippetRepository;
 import com.severentertainment.snippetmanager.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +103,7 @@ public class SnippetService {
      * or an empty {@link Optional} if not.
      */
     @Transactional
-    public Optional<Snippet> addTagToSnippet(Long snippetId, Long tagId) {
+    public Optional<SnippetResponseDto> addTagToSnippet(Long snippetId, Long tagId) {
         Optional<Snippet> snippetOptional = snippetRepository.findById(snippetId);
         Optional<Tag> tagOptional = tagRepository.findById(tagId);
 
@@ -110,7 +113,8 @@ public class SnippetService {
 
             snippet.getTags().add(tag); // Add tag to the snippet's set of tags
 
-            return Optional.of(snippetRepository.save(snippet));
+            Snippet savedSnippet = snippetRepository.save(snippet);
+            return Optional.of(EntityToDtoMapper.snippetToSnippetResponseDto(savedSnippet));
         }
 
         return Optional.empty(); // Snippet or Tag not found
@@ -125,7 +129,7 @@ public class SnippetService {
      * or an empty {@link Optional} if not.
      */
     @Transactional
-    public Optional<Snippet> removeTagFromSnippet(Long snippetId, Long tagId) {
+    public Optional<SnippetResponseDto> removeTagFromSnippet(Long snippetId, Long tagId) {
         Optional<Snippet> snippetOptional = snippetRepository.findById(snippetId);
         Optional<Tag> tagOptional = tagRepository.findById(tagId);
 
@@ -134,15 +138,9 @@ public class SnippetService {
             Tag tag = tagOptional.get();
 
             boolean removed = snippet.getTags().remove(tag); // Remove tag from the snippet's set of tags
-            if (removed) {
-                return Optional.of(snippetRepository.save(snippet));
-            } else {
-                // TODO: Determine appropriate action in this case
-                //  - return snippet as is (successful operation)
-                //  OR
-                //  - return an empty optional (unsuccessful operation)
-                return snippetOptional;
-            }
+
+            Snippet updatedSnippet = removed ? snippetRepository.save(snippet) : snippet;
+            return Optional.of(EntityToDtoMapper.snippetToSnippetResponseDto(updatedSnippet));
         }
 
         return Optional.empty();
@@ -152,12 +150,13 @@ public class SnippetService {
      * Retrieves all tags associated with a snippet.
      *
      * @param snippetId The ID of the snippet.
-     * @return An {@link Optional} containing the {@link Set} of {@link Tag} objects.
+     * @return An {@link Optional} containing a Set of {@link TagResponseDto} objects if the snippet is found,
+     * otherwise an empty {@link Optional}.
      */
     @Transactional(readOnly = true)
-    public Optional<Set<Tag>> getTagsForSnippet(Long snippetId) {
+    public Optional<Set<TagResponseDto>> getTagsForSnippet(Long snippetId) {
         return snippetRepository.findById(snippetId)
-                .map(Snippet::getTags);
+                .map(snippet -> EntityToDtoMapper.tagsToTagResponseDtos(snippet.getTags()));
     }
 
 }
