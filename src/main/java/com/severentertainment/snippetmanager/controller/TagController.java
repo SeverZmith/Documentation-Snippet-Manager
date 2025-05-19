@@ -1,6 +1,7 @@
 package com.severentertainment.snippetmanager.controller;
 
 import com.severentertainment.snippetmanager.domain.Tag;
+import com.severentertainment.snippetmanager.dto.TagResponseDto;
 import com.severentertainment.snippetmanager.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,8 +33,8 @@ public class TagController {
      * or 200 (OK) if an existing tag was found.
      */
     @PostMapping
-    public ResponseEntity<Tag> createOrGetTag(@RequestBody Tag tag) {
-        Tag resultTag = tagService.createOrGetTag(tag);
+    public ResponseEntity<TagResponseDto> createOrGetTag(@RequestBody Tag tag) {
+        TagResponseDto resultTag = tagService.createOrGetTag(tag);
         return new ResponseEntity<>(resultTag, HttpStatus.CREATED);
     }
 
@@ -44,8 +45,8 @@ public class TagController {
      * and an HTTP status code of 200 (OK). The list may be empty if no tags exist.
      */
     @GetMapping
-    public ResponseEntity<List<Tag>> getAllTags() {
-        List<Tag> tags = tagService.getAllTags();
+    public ResponseEntity<List<TagResponseDto>> getAllTags() {
+        List<TagResponseDto> tags = tagService.getAllTags();
         return new ResponseEntity<>(tags, HttpStatus.OK);
     }
 
@@ -57,8 +58,8 @@ public class TagController {
      * and an HTTP status code of 200 (OK) or 404 (Not Found).
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Tag> getTagById(@PathVariable Long id) {
-        Optional<Tag> tagOptional = tagService.getTagById(id);
+    public ResponseEntity<TagResponseDto> getTagById(@PathVariable Long id) {
+        Optional<TagResponseDto> tagOptional = tagService.getTagById(id);
         return tagOptional
                 .map(tag -> new ResponseEntity<>(tag, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
@@ -74,8 +75,8 @@ public class TagController {
      * and an HTTP status code of 200 (OK) or 404 (Not Found).
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Tag> updateTag(@PathVariable Long id, @RequestBody Tag tagDetails) {
-        Optional<Tag> updatedTagOptional = tagService.updateTag(id, tagDetails);
+    public ResponseEntity<TagResponseDto> updateTag(@PathVariable Long id, @RequestBody Tag tagDetails) {
+        Optional<TagResponseDto> updatedTagOptional = tagService.updateTag(id, tagDetails);
         return updatedTagOptional
                 .map(tag -> new ResponseEntity<>(tag, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));

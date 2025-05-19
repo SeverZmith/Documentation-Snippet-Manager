@@ -2,6 +2,8 @@ package com.severentertainment.snippetmanager.service;
 
 import com.severentertainment.snippetmanager.domain.Snippet;
 import com.severentertainment.snippetmanager.domain.Tag;
+import com.severentertainment.snippetmanager.dto.EntityToDtoMapper;
+import com.severentertainment.snippetmanager.dto.TagResponseDto;
 import com.severentertainment.snippetmanager.repository.SnippetRepository;
 import com.severentertainment.snippetmanager.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TagService {
@@ -30,7 +33,7 @@ public class TagService {
      * @return The created or existing Tag.
      */
     @Transactional
-    public Tag createOrGetTag(Tag tag) {
+    public TagResponseDto createOrGetTag(Tag tag) {
         if (tag.getName() == null || tag.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Tag name for create cannot be null or empty");
         }
@@ -42,11 +45,13 @@ public class TagService {
         Optional<Tag> existingTag = tagRepository.findByNameIgnoreCase(normalizedTagName);
 
         if (existingTag.isPresent()) {
-            return existingTag.get();
+            return EntityToDtoMapper.tagToTagResponseDto(existingTag.get());
         } else { // If a tag doesn't exist, create a new one
             Tag newTag = new Tag();
             newTag.setName(normalizedTagName);
-            return tagRepository.save(newTag);
+
+            Tag savedTag = tagRepository.save(newTag);
+            return EntityToDtoMapper.tagToTagResponseDto(savedTag);
         }
     }
 
@@ -56,8 +61,11 @@ public class TagService {
      * @return A list of all tags.
      */
     @Transactional(readOnly = true)
-    public List<Tag> getAllTags() {
-        return tagRepository.findAll();
+    public List<TagResponseDto> getAllTags() {
+        List<Tag> tags = tagRepository.findAll();
+        return tags.stream()
+                .map(EntityToDtoMapper::tagToTagResponseDto)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -67,8 +75,9 @@ public class TagService {
      * @return An Optional containing the Tag if found, or an empty Optional if not.
      */
     @Transactional(readOnly = true)
-    public Optional<Tag> getTagById(Long id) {
-        return tagRepository.findById(id);
+    public Optional<TagResponseDto> getTagById(Long id) {
+        return tagRepository.findById(id)
+                .map(EntityToDtoMapper::tagToTagResponseDto);
     }
 
     /**
@@ -81,7 +90,7 @@ public class TagService {
      * @return An Optional containing the updated Tag if successful, or an empty Optional if not.
      */
     @Transactional
-    public Optional<Tag> updateTag(Long id, Tag tagDetails) {
+    public Optional<TagResponseDto> updateTag(Long id, Tag tagDetails) {
         if (tagDetails.getName() == null || tagDetails.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Tag name for update cannot be null or empty");
         }
@@ -101,7 +110,9 @@ public class TagService {
 
         Tag tagToUpdate = existingTagOptional.get();
         tagToUpdate.setName(newNormalizedName);
-        return Optional.of(tagRepository.save(tagToUpdate));
+
+        Tag savedTag = tagRepository.save(tagToUpdate);
+        return Optional.of(EntityToDtoMapper.tagToTagResponseDto(savedTag));
     }
 
     /**

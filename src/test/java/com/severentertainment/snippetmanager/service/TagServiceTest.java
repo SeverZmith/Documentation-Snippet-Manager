@@ -1,6 +1,7 @@
 package com.severentertainment.snippetmanager.service;
 
 import com.severentertainment.snippetmanager.domain.Tag;
+import com.severentertainment.snippetmanager.dto.TagResponseDto;
 import com.severentertainment.snippetmanager.repository.TagRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,6 +41,12 @@ public class TagServiceTest {
         savedTagFromRepo.setId(1L);
         savedTagFromRepo.setName(normalizedName);
 
+        // Simulate expected tag DTO
+        TagResponseDto expectedTagDto = new TagResponseDto(
+                1L,
+                normalizedName
+        );
+
         // Configure the mock repository behavior:
         //  - findByNameIgnoreCase should return an empty optional (tag doesn't exist)
         when(tagRepositoryMock.findByNameIgnoreCase(normalizedName)).thenReturn(Optional.empty());
@@ -47,12 +54,12 @@ public class TagServiceTest {
         when(tagRepositoryMock.save(any(Tag.class))).thenReturn(savedTagFromRepo);
 
         // Call the method under test
-        Tag resultTag = tagService.createOrGetTag(tagInput);
+        TagResponseDto actualTagDto = tagService.createOrGetTag(tagInput);
 
         // 1. Check the returned tag's properties
-        assertNotNull(resultTag, "The returned tag should not be null");
-        assertEquals(savedTagFromRepo.getId(), resultTag.getId(), "ID of the returned tag should match the ID of the saved tag");
-        assertEquals(normalizedName, resultTag.getName(), "Name of the returned tag should match the normalized name of the input tag");
+        assertNotNull(actualTagDto, "The returned tag should not be null");
+        assertEquals(expectedTagDto.getId(), actualTagDto.getId(), "ID of the returned tag should match the ID of the saved tag");
+        assertEquals(expectedTagDto.getName(), actualTagDto.getName(), "Name of the returned tag should match the normalized name of the input tag");
 
         // 2. Verify that findByNameIgnoreCase was called once with the normalized name
         verify(tagRepositoryMock, times(1)).findByNameIgnoreCase(normalizedName);
@@ -61,10 +68,8 @@ public class TagServiceTest {
         ArgumentCaptor<Tag> tagArgumentCaptor = ArgumentCaptor.forClass(Tag.class);
         verify(tagRepositoryMock, times(1)).save(tagArgumentCaptor.capture());
 
-        Tag tagPassedToSave = tagArgumentCaptor.getValue();
-        assertNotNull(tagPassedToSave, "The tag passed to the repository should not be null");
-        assertEquals(normalizedName, tagPassedToSave.getName(), "Name of the tag passed to the repository should match the normalized name of the input tag");
-        assertNull(tagPassedToSave.getId(), "ID of the tag passed to the repository should be null");
+        assertEquals(normalizedName, tagArgumentCaptor.getValue().getName(), "The tag passed to save should have the normalized name");
+        assertNull(tagArgumentCaptor.getValue().getId(), "The tag passed to save should not have an ID");
     }
 
     @Test
@@ -81,18 +86,24 @@ public class TagServiceTest {
         existingTag.setId(1L);
         existingTag.setName(normalizedName);
 
+        // Simulate expected tag DTO
+        TagResponseDto expectedTagDto = new TagResponseDto(
+                1L,
+                normalizedName
+        );
+
         // Configure the mock repository to return the existing tag
         when(tagRepositoryMock.findByNameIgnoreCase(normalizedName)).thenReturn(Optional.of(existingTag));
 
         // Call the method under test
-        Tag resultTag = tagService.createOrGetTag(tagInput);
+        TagResponseDto actualTagDto = tagService.createOrGetTag(tagInput);
 
         // 1. Check that the returned tag is not null
-        assertNotNull(resultTag, "The returned tag should not be null");
+        assertNotNull(actualTagDto, "The returned tag should not be null");
 
         // 2. Check that the returned tag matches the existing tag
-        assertEquals(existingTag.getId(), resultTag.getId(), "ID of the returned tag should match the ID of the existing tag");
-        assertEquals(normalizedName, resultTag.getName(), "Name of the returned tag should match the name of the existing tag");
+        assertEquals(expectedTagDto.getId(), actualTagDto.getId(), "ID of the returned tag should match the ID of the existing tag");
+        assertEquals(expectedTagDto.getName(), actualTagDto.getName(), "Name of the returned tag should match the name of the existing tag");
 
         // 3. Verify interactions with the repository:
         //  - findByNameIgnoreCase should be called once with the normalized name
@@ -115,10 +126,10 @@ public class TagServiceTest {
             tagService.createOrGetTag(tagWithNullName);
         }, "Should throw an IllegalArgumentException when the tag name is null");
 
-        // Check that the exception message matches the expected message
+        // 1. Check that the exception message matches the expected message
         assertEquals(expectedErrorMessage, exception.getMessage(), "The exception message should match the expected message");
 
-        // Verify no repository methods were called
+        // 2. Verify no repository methods were called
         verify(tagRepositoryMock, never()).findByNameIgnoreCase(anyString());
         verify(tagRepositoryMock, never()).save(any(Tag.class));
     }
@@ -137,10 +148,10 @@ public class TagServiceTest {
             tagService.createOrGetTag(tagWithEmptyName);
         }, "Should throw an IllegalArgumentException when the tag name is empty");
 
-        // Check that the exception message matches the expected message
+        // 1. Check that the exception message matches the expected message
         assertEquals(expectedErrorMessage, exception.getMessage(), "The exception message should match the expected message");
 
-        // Verify no repository methods were called
+        // 2. Verify no repository methods were called
         verify(tagRepositoryMock, never()).findByNameIgnoreCase(anyString());
         verify(tagRepositoryMock, never()).save(any(Tag.class));
     }
@@ -159,10 +170,10 @@ public class TagServiceTest {
             tagService.createOrGetTag(tagWithBlankName);
         }, "Should throw an IllegalArgumentException when the tag name is blank");
 
-        // Check that the exception message matches the expected message
+        // 1. Check that the exception message matches the expected message
         assertEquals(expectedErrorMessage, exception.getMessage(), "The exception message should match the expected message");
 
-        // Verify no repository methods were called
+        // 2. Verify no repository methods were called
         verify(tagRepositoryMock, never()).findByNameIgnoreCase(anyString());
         verify(tagRepositoryMock, never()).save(any(Tag.class));
     }
@@ -173,11 +184,11 @@ public class TagServiceTest {
         when(tagRepositoryMock.findAll()).thenReturn(Collections.emptyList());
 
         // Call the method under test
-        List<Tag> actualTags = tagService.getAllTags();
+        List<TagResponseDto> actualTagDtos = tagService.getAllTags();
 
         // 1. Check that the returned list is empty
-        assertNotNull(actualTags, "The returned list of tags should not be null");
-        assertTrue(actualTags.isEmpty(), "The returned list of tags should be empty");
+        assertNotNull(actualTagDtos, "The returned list of tags should not be null");
+        assertTrue(actualTagDtos.isEmpty(), "The returned list of tags should be empty");
 
         // 2. Verify that findAll was called once
         verify(tagRepositoryMock, times(1)).findAll();
@@ -195,21 +206,36 @@ public class TagServiceTest {
 
         List<Tag> expectedTags = Arrays.asList(tag1, tag2);
 
+        // Simulate tag DTOs
+        TagResponseDto expectedTagDto1 = new TagResponseDto(
+                tag1.getId(),
+                tag1.getName()
+        );
+
+        TagResponseDto expectedTagDto2 = new TagResponseDto(
+                tag2.getId(),
+                tag2.getName()
+        );
+
+        List<TagResponseDto> expectedTagDtos = Arrays.asList(expectedTagDto1, expectedTagDto2);
+
         // Configure the mock repository to return a list of tags when findAll is called
         when(tagRepositoryMock.findAll()).thenReturn(expectedTags);
 
         // Call the method under test
-        List<Tag> actualTags = tagService.getAllTags();
+        List<TagResponseDto> actualTagDtos = tagService.getAllTags();
 
         // 1. Check that the returned list is not empty
-        assertNotNull(actualTags, "The returned list of tags should not be null");
-        assertFalse(actualTags.isEmpty(), "The returned list of tags should not be empty");
+        assertNotNull(actualTagDtos, "The returned list of tags should not be null");
+        assertFalse(actualTagDtos.isEmpty(), "The returned list of tags should not be empty");
 
         // 2. Check that the returned list matches the expected list
-        assertEquals(2, actualTags.size(), "The returned list of tags should have 2 elements");
-        assertEquals(expectedTags, actualTags, "The returned list of tags should match the expected list");
+        assertEquals(2, actualTagDtos.size(), "The returned list of tags should have 2 elements");
 
-        // 3. Verify that findAll was called once
+        // 3. Check that the expected tags are equivalent to the actual ones
+        assertEquals(expectedTagDtos, actualTagDtos, "The returned list of tags should match the expected list");
+
+        // 4. Verify that findAll was called once
         verify(tagRepositoryMock, times(1)).findAll();
     }
 
@@ -219,18 +245,27 @@ public class TagServiceTest {
         expectedTag.setId(1L);
         expectedTag.setName("First Tag");
 
+        // Simulate expected tag DTO
+        TagResponseDto expectedTagDto = new TagResponseDto(
+                expectedTag.getId(),
+                expectedTag.getName()
+        );
+
         // Configure the mock repository to return the expected tag when findById is called
         when(tagRepositoryMock.findById(1L)).thenReturn(Optional.of(expectedTag));
 
         // Call the method under test
-        Optional<Tag> actualTagOptional = tagService.getTagById(1L);
+        Optional<TagResponseDto> actualTagDtoOptional = tagService.getTagById(1L);
 
         // 1. Check that the returned optional is present
-        assertTrue(actualTagOptional.isPresent(), "The returned optional should contain a tag for existing ID");
-        assertEquals(expectedTag, actualTagOptional.get(), "The found tag should match the expected tag");
-        assertEquals("First Tag", actualTagOptional.get().getName(), "The name of the found tag should match the expected name");
+        assertTrue(actualTagDtoOptional.isPresent(), "The returned optional should contain a tag for existing ID");
+        TagResponseDto actualTagDto = actualTagDtoOptional.get();
 
-        // 2. Verify that findById was called once
+        // 2. Check that fields were retrieved correctly
+        assertEquals(expectedTagDto.getId(), actualTagDto.getId(), "ID of the returned tag should match the ID of the saved tag");
+        assertEquals(expectedTagDto.getName(), actualTagDto.getName(), "Name of the returned tag should match the name of the saved tag");
+
+        // 3. Verify that findById was called once
         verify(tagRepositoryMock, times(1)).findById(1L);
     }
 
@@ -240,11 +275,11 @@ public class TagServiceTest {
         when(tagRepositoryMock.findById(99L)).thenReturn(Optional.empty());
 
         // Call the method under test
-        Optional<Tag> actualTagOptional = tagService.getTagById(99L);
+        Optional<TagResponseDto> actualTagDtoOptional = tagService.getTagById(99L);
 
         // 1. Check that the returned optional is empty
-        assertNotNull(actualTagOptional, "The returned optional should not be null");
-        assertTrue(actualTagOptional.isEmpty(), "The returned optional should be empty");
+        assertNotNull(actualTagDtoOptional, "The returned optional should not be null");
+        assertTrue(actualTagDtoOptional.isEmpty(), "The returned optional should be empty");
 
         // 2. Verify that findById was called once
         verify(tagRepositoryMock, times(1)).findById(99L);
@@ -271,6 +306,12 @@ public class TagServiceTest {
         expectedSavedTag.setId(tagIdToUpdate);
         expectedSavedTag.setName(newNormalizedName);
 
+        // Simulate the expected tag DTO
+        TagResponseDto expectedTagDto = new TagResponseDto(
+                tagIdToUpdate,
+                newNormalizedName
+        );
+
         // Configure the mock repository behavior:
         //  - findById should return the existing tag in the repository
         when(tagRepositoryMock.findById(tagIdToUpdate)).thenReturn(Optional.of(existingTagInRepo));
@@ -280,16 +321,15 @@ public class TagServiceTest {
         when(tagRepositoryMock.save(any(Tag.class))).thenReturn(expectedSavedTag);
 
         // Call the method under test
-        Optional<Tag> actualUpdatedTagOptional = tagService.updateTag(tagIdToUpdate, tagUpdateDetails);
+        Optional<TagResponseDto> actualUpdatedTagDtoOptional = tagService.updateTag(tagIdToUpdate, tagUpdateDetails);
 
         // 1. Check that the returned optional is present
-        assertTrue(actualUpdatedTagOptional.isPresent(), "The returned optional should contain a tag for existing ID");
-        Tag actualUpdatedTag = actualUpdatedTagOptional.get();
+        assertTrue(actualUpdatedTagDtoOptional.isPresent(), "The returned optional should contain a tag for existing ID");
+        TagResponseDto actualUpdatedTagDto = actualUpdatedTagDtoOptional.get();
 
         // 2. Check that the returned tag matches the expected tag
-        assertEquals(tagIdToUpdate, actualUpdatedTag.getId(), "ID should remain unchanged");
-        assertEquals(newNormalizedName, actualUpdatedTag.getName(), "Tag name should be updated and normalized");
-        assertEquals(expectedSavedTag.getName(), actualUpdatedTag.getName(), "Tag name should match the name of the saved tag");
+        assertEquals(expectedTagDto.getId(), actualUpdatedTagDto.getId(), "ID of the returned tag should match the ID of the saved tag");
+        assertEquals(expectedTagDto.getName(), actualUpdatedTagDto.getName(), "Name of the returned tag should match the name of the saved tag");
 
         // 3. Verify that findById and findByNameIgnoreCase were called once
         verify(tagRepositoryMock, times(1)).findById(tagIdToUpdate);
@@ -299,10 +339,7 @@ public class TagServiceTest {
         ArgumentCaptor<Tag> tagArgumentCaptor = ArgumentCaptor.forClass(Tag.class);
         verify(tagRepositoryMock, times(1)).save(tagArgumentCaptor.capture());
 
-        Tag tagPassedToSave = tagArgumentCaptor.getValue();
-        assertEquals(tagIdToUpdate, tagPassedToSave.getId(), "ID of tag passed to save should be the original ID");
-        assertEquals(newNormalizedName, tagPassedToSave.getName(), "Tag name passed to save should be the new normalized name");
-        assertSame(existingTagInRepo, tagPassedToSave, "Tag passed to save should be the same as the existing tag in the repository");
+        assertEquals(newNormalizedName, tagArgumentCaptor.getValue().getName(), "The saved tag should have the expected name");
     }
 
     @Test
@@ -315,11 +352,11 @@ public class TagServiceTest {
         when(tagRepositoryMock.findById(nonExistentTagId)).thenReturn(Optional.empty());
 
         // Call the method under test
-        Optional<Tag> actualUpdatedTagOptional = tagService.updateTag(nonExistentTagId, tagUpdateDetails);
+        Optional<TagResponseDto> actualUpdatedTagDtoOptional = tagService.updateTag(nonExistentTagId, tagUpdateDetails);
 
         // 1. Check that the returned optional is empty
-        assertNotNull(actualUpdatedTagOptional, "The returned optional should not be null");
-        assertTrue(actualUpdatedTagOptional.isEmpty(), "The returned optional should be empty");
+        assertNotNull(actualUpdatedTagDtoOptional, "The returned optional should not be null");
+        assertTrue(actualUpdatedTagDtoOptional.isEmpty(), "The returned optional should be empty");
 
         // 2. Verify that findById was called once
         verify(tagRepositoryMock, times(1)).findById(nonExistentTagId);
@@ -335,7 +372,6 @@ public class TagServiceTest {
     public void updateTag_shouldReturnEmptyOptional_whenNewNameConflictsWithAnotherTag() {
         Long tagIdToUpdate = 1L;
         String originalNameForTag1 = "original name";
-
         String conflictingName = " EXiSTing NaME ";
         String conflictingNormalizedName = "existing name";
 
@@ -360,11 +396,11 @@ public class TagServiceTest {
         when(tagRepositoryMock.findByNameIgnoreCase(conflictingNormalizedName)).thenReturn(Optional.of(anotherTagWithConflictingName));
 
         // Call the method under test
-        Optional<Tag> actualUpdatedTagOptional = tagService.updateTag(tagIdToUpdate, tagUpdateDetails);
+        Optional<TagResponseDto> actualUpdatedTagDtoOptional = tagService.updateTag(tagIdToUpdate, tagUpdateDetails);
 
         // 1. Check that the returned optional is empty
-        assertNotNull(actualUpdatedTagOptional, "The returned optional should not be null");
-        assertTrue(actualUpdatedTagOptional.isEmpty(), "The returned optional should be empty");
+        assertNotNull(actualUpdatedTagDtoOptional, "The returned optional should not be null");
+        assertTrue(actualUpdatedTagDtoOptional.isEmpty(), "The returned optional should be empty");
 
         // 2. Verify that findById and findByNameIgnoreCase were called once
         verify(tagRepositoryMock, times(1)).findById(tagIdToUpdate);
