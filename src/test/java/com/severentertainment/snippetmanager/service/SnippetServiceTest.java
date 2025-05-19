@@ -45,8 +45,20 @@ public class SnippetServiceTest {
 
     @Test
     public void getAllSnippets_shouldReturnListOfSnippets_whenSnippetsExist () {
-        Snippet snippet1 = new Snippet(1L, "First Snippet", "Content of first snippet", Instant.now(), Instant.now());
-        Snippet snippet2 = new Snippet(2L, "Second Snippet", "Content of second snippet", Instant.now(), Instant.now());
+        Snippet snippet1 = new Snippet();
+        snippet1.setId(1L);
+        snippet1.setTitle("First Snippet");
+        snippet1.setContent("Content of first snippet");
+        snippet1.setCreationData(Instant.now());
+        snippet1.setLastModifiedData(Instant.now());
+
+        Snippet snippet2 = new Snippet();
+        snippet2.setId(2L);
+        snippet2.setTitle("Second Snippet");
+        snippet2.setContent("Content of second snippet");
+        snippet2.setCreationData(Instant.now());
+        snippet2.setLastModifiedData(Instant.now());
+
         List<Snippet> expectedSnippets = Arrays.asList(snippet1, snippet2);
 
         // Configure the mock repository to return a list of snippets when findAll is called
@@ -69,7 +81,12 @@ public class SnippetServiceTest {
 
     @Test
     public void getSnippetById_shouldReturnSnippet_whenIdExists () {
-        Snippet expectedSnippet = new Snippet(1L, "First Snippet", "Content of first snippet", Instant.now(), Instant.now());
+        Snippet expectedSnippet = new Snippet();
+        expectedSnippet.setId(1L);
+        expectedSnippet.setTitle("First Snippet");
+        expectedSnippet.setContent("Content of first snippet");
+        expectedSnippet.setCreationData(Instant.now());
+        expectedSnippet.setLastModifiedData(Instant.now());
 
         // Configure the mock repository to return the expected snippet when findById is called
         when(snippetRepositoryMock.findById(1L)).thenReturn(Optional.of(expectedSnippet));
@@ -150,7 +167,12 @@ public class SnippetServiceTest {
         Instant initialUpdateDate = Instant.now().minusSeconds(3600);
 
         // Represents the state of the snippet before updating
-        Snippet existingSnippet = new Snippet(snippetId, "Existing Snippet", "Content of existing snippet", initialCreationDate, initialUpdateDate);
+        Snippet existingSnippet = new Snippet();
+        existingSnippet.setId(snippetId);
+        existingSnippet.setTitle("Existing Snippet");
+        existingSnippet.setContent("Content of existing snippet");
+        existingSnippet.setCreationData(initialCreationDate);
+        existingSnippet.setLastModifiedData(initialUpdateDate);
 
         // Represents the new data coming in
         Snippet snippetUpdateDetails = new Snippet();

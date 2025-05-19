@@ -185,8 +185,14 @@ public class TagServiceTest {
 
     @Test
     public void getAllTags_shouldReturnListOfTags_whenTagsExist() {
-        Tag tag1 = new Tag(1L, "First Tag");
-        Tag tag2 = new Tag(2L, "Second Tag");
+        Tag tag1 = new Tag();
+        tag1.setId(1L);
+        tag1.setName("First Tag");
+
+        Tag tag2 = new Tag();
+        tag2.setId(2L);
+        tag2.setName("Second Tag");
+
         List<Tag> expectedTags = Arrays.asList(tag1, tag2);
 
         // Configure the mock repository to return a list of tags when findAll is called
@@ -209,7 +215,9 @@ public class TagServiceTest {
 
     @Test
     public void getTagById_shouldReturnTag_whenIdExists() {
-        Tag expectedTag = new Tag(1L, "First Tag");
+        Tag expectedTag = new Tag();
+        expectedTag.setId(1L);
+        expectedTag.setName("First Tag");
 
         // Configure the mock repository to return the expected tag when findById is called
         when(tagRepositoryMock.findById(1L)).thenReturn(Optional.of(expectedTag));
@@ -332,10 +340,14 @@ public class TagServiceTest {
         String conflictingNormalizedName = "existing name";
 
         // Simulate the tag to update in the repository
-        Tag tagToUpdate = new Tag(tagIdToUpdate, originalNameForTag1);
+        Tag tagToUpdate = new Tag();
+        tagToUpdate.setId(tagIdToUpdate);
+        tagToUpdate.setName(originalNameForTag1);
 
         // Simulate another tag that already has the conflicting name
-        Tag anotherTagWithConflictingName = new Tag(2L, conflictingNormalizedName);
+        Tag anotherTagWithConflictingName = new Tag();
+        anotherTagWithConflictingName.setId(2L);
+        anotherTagWithConflictingName.setName(conflictingName);
 
         // Simulate the details coming in for the update request
         Tag tagUpdateDetails = new Tag();
