@@ -4,7 +4,7 @@ build/
 out/
 
 ### Maven Wrapper JAR ###
-.mvn/wrapper/maven-wrapper.jar
+backend/.mvn/wrapper/maven-wrapper.jar
 
 ### IntelliJ IDEA ###
 .idea/
@@ -43,4 +43,4 @@ hs_err_pid*
 Thumbs.db
 
 ### Other ###
-HELP.md
+backend/HELP.md
