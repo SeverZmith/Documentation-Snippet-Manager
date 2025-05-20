@@ -1,19 +1,35 @@
-### Build Output ###
-target/
-build/
-out/
+### GLOBAL GITIGNORE ###
 
-### Maven Wrapper JAR ###
-backend/.mvn/wrapper/maven-wrapper.jar
-
-### IntelliJ IDEA ###
+### IDE Configuration (Project Level) ###
+# IntelliJ
 .idea/
 *.iml
 *.ipr
 *.iws
-
-### VS Code ###
+# VSCode
 .vscode/
+
+### Main Sub-Project Outputs & Dependencies ###
+/backend/target/
+/frontend/node_modules/
+/frontend/dist/
+/frontend/dist-ssr/
+/frontend/*.local
+
+### General Build Output (Universal Catch-alls) ###
+target/
+build/
+out/
+
+### Log Files (Project Root or Uncategorized) ###
+*.log
+/logs/
+
+### Operating System Generated Files ###
+.DS_Store
+Thumbs.db
+._*
+*~
 
 ### Spring Tool Suite (STS) ###
 .apt_generated
@@ -30,17 +46,3 @@ backend/.mvn/wrapper/maven-wrapper.jar
 /dist/
 /nbdist/
 /.nb-gradle/
-
-### Logs ###
-*.log
-logs/
-
-### JVM Crash Logs ###
-hs_err_pid*
-
-### OS ###
-.DS_Store
-Thumbs.db
-
-### Other ###
-backend/HELP.md

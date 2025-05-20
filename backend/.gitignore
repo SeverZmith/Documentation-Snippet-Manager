@@ -1,0 +1,37 @@
+### BACKEND GITIGNORE ###
+
+### Maven Build Output ###
+# Maven build output specific to this backend module
+/target/
+# Compiled class files
+*.class
+
+### Maven Specific ###
+# Maven Wrapper JAR
+/.mvn/wrapper/maven-wrapper.jar
+# HELP.md
+/HELP.md
+
+### JVM Specific ###
+# JVM Crash Logs
+hs_err_pid*
+
+### IDE Specific (Backend Context) ###
+# Spring Tool Suite (STS) / Eclipse specific files
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+
+### Logs (Backend Specific) ###
+/logs/
+*.log
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
