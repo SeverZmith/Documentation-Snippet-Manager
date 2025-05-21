@@ -15,7 +15,7 @@ function SnippetList() {
     const [isLoading, setIsLoading] = useState(true);
 
     // State to track any errors that occur during the fetch operation
-    const [error, setError] = useState(null);
+    const [isError, setError] = useState(null);
 
     // Effect hook to fetch snippets when the component mounts
     useEffect(() => {
@@ -42,8 +42,8 @@ function SnippetList() {
         return <div className="text-center p-4">Loading snippets...</div>;
     }
 
-    if (error) {
-        return <div className="text-center p-4 text-red-500">Error: {error}</div>;
+    if (isError) {
+        return <div className="text-center p-4 text-red-500">Error: {isError}</div>;
     }
 
     return (
