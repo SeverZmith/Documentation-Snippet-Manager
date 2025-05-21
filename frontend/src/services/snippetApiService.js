@@ -25,3 +25,32 @@ export const getAllSnippets = async () => {
         throw error;
     }
 }
+
+/**
+ * 
+ * @async
+ * @param {object} snippetData - An object containing the snippet's details.
+ * @returns {Promise<Array<Object>>} A promise that resolves to the created Snippet DTO.
+ * @throws {Error} If the fetch fails or the response is not ok.
+ */
+export const createSnippet = async (snippetData) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/snippets`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(snippetData), // Convert the JavaScript object to a JSON string
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ message: response.statusText }));
+            throw new Error(`Failed to create snippet: ${response.status} ${errorData.message || response.statusText}`);
+        }
+
+        return await response.json(); // Parse the JSON response body
+    } catch (error) {
+        console.error("Error in createSnippet:", error);
+        throw error;
+    }
+}
