@@ -45,15 +45,18 @@ export const getSnippetById = async (id) => {
 
         return await response.json();
     } catch (error) {
-        console.error("Error in getSnippetById:", error);
+        console.error(`Error in getSnippetById for id - ${id}:`, error);
         throw error;
     }
 }
 
 /**
+ * Creates a new snippet through the backend API
  * 
  * @async
  * @param {object} snippetData - An object containing the snippet's details.
+ * @param {string} [snippetData.title] - The title of the snippet.
+ * @param {string} [snippetData.content] - The content of the snippet.
  * @returns {Promise<Array<Object>>} A promise that resolves to the created Snippet DTO.
  * @throws {Error} If the fetch fails or the response is not ok.
  */
@@ -75,6 +78,39 @@ export const createSnippet = async (snippetData) => {
         return await response.json(); // Parse the JSON response body
     } catch (error) {
         console.error("Error in createSnippet:", error);
+        throw error;
+    }
+}
+
+/**
+ * Updates an existing snippet through the backend API
+ * 
+ * @async
+ * @param {number|string} id - The ID of the snippet to update.
+ * @param {object} snippetData - An object containing the updated snippet's details.
+ * @param {string} [snippetData.title] - The title of the snippet.
+ * @param {string} [snippetData.content] - The content of the snippet.
+ * @returns {Promise<Object>} A promise that resolves to the updated Snippet DTO.
+ * @throws {Error} If the fetch fails or the response is not ok.
+ */
+export const updateSnippet = async (id, snippetData) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/snippets/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(snippetData),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ message: response.statusText }));
+            throw new Error(`Failed to update snippet: ${response.status} ${errorData.message || response.statusText}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error(`Error in updateSnippet for id - ${id}:`, error);
         throw error;
     }
 }

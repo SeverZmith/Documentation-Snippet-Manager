@@ -67,7 +67,7 @@ function App() {
                     } />
 
                     {/* Snippet Details Page */}
-                    <Route path="/snippets/:snippetId" element={<SnippetDetailsPage />} />
+                    <Route path="/snippets/:snippetId" element={<SnippetDetailsPage onSnippetUpdated={fetchAllSnippets} />} />
 
                 </Routes>
             </main>
