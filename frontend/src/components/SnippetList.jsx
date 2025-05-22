@@ -1,5 +1,6 @@
 // frontend/src/components/SnippetList.jsx
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 /**
  * @module SnippetList
@@ -67,40 +68,55 @@ function SnippetList({ snippets, isLoading, error, onRefresh }) {
             ) : (
                 <ul className="space-y-6">
                     {snippets.map(snippet => (
-                        <li key={snippet.id} className="p-6 border border-gray-200 rounded-lg hover:shadow-xl transition-shadow duration-300 ease-in-out bg-slate-50">
+                        <li
+                            key={snippet.id}
+                            className="flex items-stretch overflow-hidden border border-gray-200 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 ease-in-out bg-white"
+                        >
+                            <div className="flex-grow p-4 sm:p-6">
 
-                            {/* Display Title */}
-                            <h3 className="text-2xl font-medium text-sky-700 mb-2">{snippet.title}</h3>
+                                {/* Display Title */}
+                                <h3 className="text-xl sm:text-2xl font-medium text-sky-700 mb-2">{snippet.title}</h3>
 
-                            {/* Display Content */}
-                            <pre className="text-gray-700 mt-1 whitespace-pre-wrap bg-gray-100 p-3 rounded-md text-sm font-mono overflow-x-auto">
-                                {snippet.content}
-                            </pre>
+                                {/* Display Content */}
+                                <pre className="text-gray-700 mt-1 whitespace-pre-wrap bg-gray-100 p-3 rounded-md text-sm font-mono overflow-x-auto max-h-32">
+                                    {snippet.content}
+                                </pre>
 
-                            {/* Display Creation & Modified Dates */}
-                            <div className="mt-3 text-xs text-gray-500">
-                                {snippet.creationDate && (
-                                    <p>Created: {new Date(snippet.creationDate).toLocaleString()}</p>
-                                )}
-                                {snippet.lastModifiedDate && (
-                                    <p>Last Modified: {new Date(snippet.lastModifiedDate).toLocaleString()}</p>
+                                {/* Display Creation & Modified Dates */}
+                                <div className="mt-3 text-xs text-gray-500 space-y-1">
+                                    {snippet.creationDate && (
+                                        <p>Created: {new Date(snippet.creationDate).toLocaleString()}</p>
+                                    )}
+                                    {snippet.lastModifiedDate && (
+                                        <p>Last Modified: {new Date(snippet.lastModifiedDate).toLocaleString()}</p>
+                                    )}
+                                </div>
+
+                                {/* Display Tags */}
+                                {snippet.tags && snippet.tags.length > 0 && (
+                                    <div className="mt-4 pt-2 border-t border-gray-200">
+                                        <span className="text-sm font-medium text-gray-600">Tags: </span>
+                                        {snippet.tags.map(tag => (
+                                            <span
+                                            key={tag.id}
+                                            className="inline-block bg-sky-100 text-sky-800 text-xs front-semibold mr-2 px-2.5 py-1 rounded-full"
+                                            >
+                                                {tag.name}
+                                            </span>
+                                        ))}
+                                    </div>
                                 )}
                             </div>
 
-                            {/* Display Tags */}
-                            {snippet.tags && snippet.tags.length > 0 && (
-                                <div className="mt-4 pt-2 border-t border-gray-200">
-                                    <span className="text-sm font-medium text-gray-600">Tags: </span>
-                                    {snippet.tags.map(tag => (
-                                        <span
-                                            key={tag.id}
-                                            className="inline-block bg-sky-100 text-sky-800 text-xs front-semibold mr-2 px-2.5 py-1 rounded-full"
-                                        >
-                                            {tag.name}
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
+                            <Link
+                                to={`/snippets/${snippet.id}`}
+                                className="group flex-shrink-0 w-16 sm:w-20 bg-slate-50 hover:bg-slate-100 flex items-center justify-center transition-colors duration-150 ease-in-out border-l border-gray-200"
+                                aria-label={`View details for ${snippet.title}`}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6 text-slate-400 group-hover:text-sky-600 transition-colors duration-150 ease-in-out">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                </svg>
+                            </Link>
                         </li>
                     ))}
                 </ul>

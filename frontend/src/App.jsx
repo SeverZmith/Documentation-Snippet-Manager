@@ -1,8 +1,10 @@
 // frontend/src/App.jsx
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, Outlet, Link } from 'react-router-dom';
 import SnippetList from "./components/SnippetList";
 import CreateSnippetForm from './components/CreateSnippetForm';
 import { getAllSnippets } from './services/snippetApiService.js';
+import SnippetDetailsPage from './components/SnippetDetailsPage.jsx';
 
 function App() {
     const [snippets, setSnippets] = useState([]);
@@ -35,27 +37,39 @@ function App() {
         <div className="min-h-screen bg-slate-100 flex flex-col items-center p-6">
         
             {/* Header Section */}
-            <header className="mb-8 text-center">
-                <h1 className="text-5xl font-extrabold text-sky-600">
+            <header className="mb-8 text-center w-full max-w-4xl">
+                <Link to="/" className="text-5xl font-extrabold text-sky-600 hover:text-sky-700 no-underline">
                     Documentation Snippet Manager
-                </h1>
+                </Link>
+                <nav className="mt-4">
+                    <Link to="/" className="mr-4 text-sky-500 hover:text-sky-600">Home</Link>
+                    <Link to="/snippets/new" className="text-sky-500 hover:text-sky-600">Create Snippet</Link>
+                </nav>
             </header>
 
             {/* Main Content Area */}
             <main className="w-full max-w-4xl">
+                <Routes>
 
-                {/* Create Snippet Form */}
-                <CreateSnippetForm onSnippetCreated={handleSnippetCreated} />
+                    {/* Snippet List */}
+                    <Route path="/" element={
+                        <SnippetList
+                            snippets={snippets}
+                            isLoading={isLoading}
+                            error={error}
+                            onRefresh={fetchAllSnippets}
+                        />
+                    } />
 
-                {/* Snippet List */}
-                <div className="mt-12">
-                    <SnippetList
-                        snippets={snippets}
-                        isLoading={isLoading}
-                        error={error}
-                        onRefresh={fetchAllSnippets}
-                    />
-                </div>
+                    {/* Create Snippet Form */}
+                    <Route path="/snippets/new" element={
+                        <CreateSnippetForm onSnippetCreated={handleSnippetCreated} />
+                    } />
+
+                    {/* Snippet Details Page */}
+                    <Route path="/snippets/:snippetId" element={<SnippetDetailsPage />} />
+
+                </Routes>
             </main>
 
             {/* Footer Section */}

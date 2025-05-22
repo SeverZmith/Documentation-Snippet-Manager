@@ -27,6 +27,30 @@ export const getAllSnippets = async () => {
 }
 
 /**
+ * Fetches a single snippet by its ID from the backend API
+ * 
+ * @async
+ * @param {number|string} id - The ID of the snippet to fetch.
+ * @returns {Promise<Object>} A promise that resolves to the Snippet DTO.
+ * @throws {Error} If the fetch fails or the response is not ok.
+ */
+export const getSnippetById = async (id) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/snippets/${id}`);
+        if (!response.ok) {
+            // Attempt to parse error response from backend
+            const errorData = await response.json().catch(() => ({ message: response.statusText }));
+            throw new Error(`Failed to fetch snippet: ${response.status} ${errorData.message || ''}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error in getSnippetById:", error);
+        throw error;
+    }
+}
+
+/**
  * 
  * @async
  * @param {object} snippetData - An object containing the snippet's details.
