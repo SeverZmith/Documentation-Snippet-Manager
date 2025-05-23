@@ -57,7 +57,7 @@ export const getSnippetById = async (id) => {
  * @param {object} snippetData - An object containing the snippet's details.
  * @param {string} [snippetData.title] - The title of the snippet.
  * @param {string} [snippetData.content] - The content of the snippet.
- * @returns {Promise<Array<Object>>} A promise that resolves to the created Snippet DTO.
+ * @returns {Promise<Object>} A promise that resolves to the created Snippet DTO.
  * @throws {Error} If the fetch fails or the response is not ok.
  */
 export const createSnippet = async (snippetData) => {
@@ -111,6 +111,31 @@ export const updateSnippet = async (id, snippetData) => {
         return await response.json();
     } catch (error) {
         console.error(`Error in updateSnippet for id - ${id}:`, error);
+        throw error;
+    }
+}
+
+/**
+ * Deletes a snippet by its ID through the backend API
+ * 
+ * @param {number|string} id - The ID of the snippet to delete.
+ * @returns {Promise<void>} A promise that resolves when the snippet is deleted.
+ * @throws {Error} If the fetch fails or the response is not ok.
+ */
+export const deleteSnippet = async (id) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/snippets/${id}`, {
+            method: 'DELETE',
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ message: response.statusText }));
+            throw new Error(`Failed to delete snippet: ${response.status} ${errorData.message || response.statusText}`);
+        }
+
+        return;
+    } catch (error) {
+        console.error(`Error in deleteSnippet for id - ${id}:`, error);
         throw error;
     }
 }
